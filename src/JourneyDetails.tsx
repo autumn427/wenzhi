@@ -156,7 +156,7 @@ export function JourneyEnding({run,onContinue,continueLabel,onReplay}:{run:Unive
 }
 
 const ticketLabels: Record<string, string> = {technicalSkill:'技术',aiCollaboration:'AI 协作',domainDepth:'专业',portfolio:'作品',opportunity:'机会',confidence:'信心',energy:'精力',weeklyHours:'投入'}
-export function JourneyTickets({run}:{run:UniverseRun}) {
+export function JourneyTickets({run,startIndex=0}:{run:UniverseRun;startIndex?:number}) {
  return <section className="journey-tickets" aria-label="每次选择的故事票根">
   {run.decisions.length ? run.decisions.map((decision,index)=> {
    const changes=Object.entries(decision.delta).map(([key,value])=> {
@@ -164,7 +164,7 @@ export function JourneyTickets({run}:{run:UniverseRun}) {
     return [key,decision.stateBefore && decision.stateAfter ? decision.stateAfter[metric]-decision.stateBefore[metric] : value] as const
    }).filter(([,value])=>value!==0)
    return <article className="journey-ticket" key={`${run.code}-${decision.eventId}`}>
-    <header><span>宇宙 {run.code} · 第 {decision.day} 天</span><b>{String(index+1).padStart(2,'0')}</b></header>
+    <header><span>宇宙 {run.code} · 第 {decision.day} 天</span><b>{String(startIndex+index+1).padStart(2,'0')}</b></header>
     <p className="ticket-story">{decision.eventSnapshot?.story ?? '这条旧记录没有保存当时的完整故事。'}</p>
     <section className="ticket-choice"><small>当时的选择</small><strong>{decision.choiceLabel}</strong></section>
     <div className="ticket-changes" aria-label="这次选择的能力变化">{changes.length ? changes.map(([key,value])=><span key={key} className={value>0?'up':'down'}>{ticketLabels[key]??key} {value>0?'+':''}{value}</span>) : <span>能力值未变化</span>}</div>

@@ -21,7 +21,8 @@ import { useGSAP } from '@gsap/react'
 import { PaperLanding } from './PaperLanding'
 import { StoryEventCard, UniverseDoors } from './StoryJourney'
 import { JourneyWayfinding } from './JourneyWayfinding'
-import { StateRadar, PathHistory, JourneyEnding, JourneyTickets } from './JourneyDetails'
+import { JourneyEnding } from './JourneyDetails'
+import { JourneyMap } from './JourneyMap'
 import { ZhihuPost } from './ZhihuPost'
 import { trackTelemetry } from './telemetry'
 import { fetchJsonWithDeadline } from './request'
@@ -1538,11 +1539,6 @@ function Home({
   const traceEvidenceItems = traceEvidenceIds
     .map((id) => programmingEvidenceById.get(id))
     .filter((item): item is Evidence => Boolean(item))
-  const featuredTraceEvidence = traceEvidenceItems.slice(0, 2)
-  const additionalTraceEvidence = traceEvidenceItems.slice(2)
-  const featuredLiveEvidence = (liveEvidence?.items ?? []).slice(0, 1)
-  const additionalLiveEvidence = (liveEvidence?.items ?? []).slice(1)
-  const additionalEvidenceCount = additionalTraceEvidence.length + additionalLiveEvidence.length
   const traceDeltaLabels: Record<string, string> = {
     technicalSkill: '技术', aiCollaboration: 'AI 协作', domainDepth: '专业', portfolio: '作品', opportunity: '机会', confidence: '信心', energy: '精力', weeklyHours: '投入',
   }
@@ -2703,13 +2699,11 @@ function Home({
               {routeEntered && scene === 2 && activeRun.currentEvent.day === 180 && <JourneyEnding run={activeRun} onContinue={() => takeFirstExperiment(activeRun)} onReplay={replayCurrentJourney} continueLabel="带走 7 天实验"/>}
               <div className={`wz-universe-story ${activeRun.currentEvent.day === 180 ? 'is-ended' : ''}`} id={`universe-story-${activeUniverse.code}`}>
 
-                {activeRun.currentEvent.day !== 180 && <h3 className="story-analysis-title">这条路，留下了什么</h3>}
-                {activeRun.currentEvent.generatedFrom && <small className="wz-generated-scene">AI 续写 · 不是未来预测</small>}
-                <div className="story-detail-stack">
-                {activeRun.currentEvent.choices.length > 0 && <details className="paper-disclosure wz-choice-compare"><summary><span className="wz-compare-summary-mark" aria-hidden="true"><i /><i /><i /></span><span><b>看看两种选择的取舍</b><small>把这一幕拆成两张行动票，再决定先拿哪一张</small></span><ArrowDown size={18} aria-hidden="true" /></summary><div className="wz-choice-compare-grid">{activeRun.currentEvent.choices.map((choice, index) => <article className={`wz-choice-compare-card choice-${index + 1}`} key={choice.id}><span className="wz-choice-compare-number">0{index + 1}</span><div><small>行动票 {index + 1}</small><b>{choice.label}</b><p>{choice.tradeoff}</p></div><ArrowRight size={19} aria-hidden="true" /></article>)}</div></details>}
-                <PathHistory key={`${activeUniverse.code}-${activeRun.currentEvent.id}`} run={activeRun} initial={activeUniverse.choice}/>
-                </div>
-                {activeRun.currentEvent.day !== 180 && <StateRadar run={activeRun}/>}
+                <JourneyMap key={`${activeUniverse.code}-${simulationCycle}`} run={activeRun} sources={[
+                  ...traceEvidenceItems.flatMap(item => item.sourceUrl && item.sourceTitle ? [{ id: item.id ?? item.sourceUrl, title: item.sourceTitle, excerpt: item.quote ?? item.conclusion, sourceUrl: item.sourceUrl, author: item.author, votes: item.votes }] : []),
+                  ...campusSources,
+                  ...(liveEvidence?.items ?? []),
+                ]} />
                 {isAiCollaborationWorkSample && (
                   <section className={`wz-work-sample step-${workSampleStep} ${workSample.evidence ? 'is-complete' : ''}`} aria-labelledby="work-sample-title">
                     <header>
@@ -2781,74 +2775,11 @@ function Home({
                     {workSample.error && <p className="wz-work-error" role="alert">{workSample.error}</p>}
                   </section>
                 )}
-                {choiceImpact?.code === activeUniverse.code && !choiceImpact.quick && activeRun.currentEvent.day !== 180 && (
-                  <aside className="wz-choice-impact-inline" aria-live="polite">
-                    <div className="wz-impact-heading"><span><Check size={15} weight="bold" />{isGeneratedActionSource(choiceImpact.source) ? `${actionSourceLabel(choiceImpact.source)}已生成专属下一幕` : '选择已经改变时间线'}</span><small>第 {choiceImpact.nextDay} 天 · 纸页已留下折痕</small></div>
-                    <div className={`wz-impact-scene wz-impact-scene-${activeUniverse.code.toLowerCase()} step-${impactSceneStep}`}>
-                      <div className="wz-impact-path" aria-hidden="true"><i /><i /><i /></div>
-                      <button type="button" className="wz-impact-kanshan" onClick={() => setImpactSceneStep((step) => (step + 1) % 3)} aria-label="让刘看山沿着时间线走一步">
-                        <span className="wz-impact-kanshan-paper"><img loading="lazy" decoding="async" src="/kanshan-stroll.gif" alt="" /></span>
-                        <span className="wz-impact-kanshan-caption">刘看山：{['我先去下一幕看看', '这里有新的线索', '把这一步记进票根'][impactSceneStep]}</span>
-                      </button>
-                      <span className="wz-impact-scene-note">点一下，让他沿着你的选择走一步</span>
-                    </div>
-                    <div className="wz-choice-impact-facts">
-                      <div className="wz-impact-fact wz-impact-next"><span className="wz-impact-icon"><GitBranch size={18} weight="duotone" /></span><div><small>下一幕</small><strong>{choiceImpact.nextTitle}</strong></div></div>
-                      {choiceImpact.tradeoff && <div className="wz-impact-fact wz-impact-cost"><span className="wz-impact-icon"><Target size={18} weight="duotone" /></span><div><small>主要代价</small><p>{choiceImpact.tradeoff}</p></div></div>}
-                      <div className="wz-impact-fact wz-impact-delta"><span className="wz-impact-icon"><Sparkles size={18} weight="duotone" /></span><div><small>能力变化</small><div>{(Object.entries(choiceImpact.delta) as Array<[keyof StateDelta, number]>).sort(([, a], [, b]) => Math.abs(b) - Math.abs(a)).slice(0, 3).map(([key, value]) => <em className={value >= 0 ? 'up' : 'down'} key={key}>{traceDeltaLabels[key] ?? key} {value >= 0 ? '+' : ''}{value}</em>)}</div></div></div>
-                    </div>
-                    {choiceImpact.causalChain && <ol className="wz-causal-etching">{choiceImpact.causalChain.map((step, index) => <li key={step}><b>0{index + 1}</b><span>{step}</span></li>)}</ol>}
-                    {choiceImpact.sourceInfluence && <p className="wz-source-influence"><BookOpen size={13} />{choiceImpact.sourceInfluence}</p>}
-                    {choiceImpact.evidence?.length ? <footer><small>本幕受 {choiceImpact.evidence.length} 条知乎真人经历约束</small>{choiceImpact.evidence.map((item) => <a href={item.sourceUrl} target="_blank" rel="noreferrer" key={item.id}>{item.author}：{item.title}<ArrowSquareOut size={11} /></a>)}</footer> : null}
-                  </aside>
-                )}
+
 
 
               </div>
               {!forkEligible && <section className="echo-entry"><div><strong>看看别人遇到这件事时怎么做</strong><p>现实回声 · 读一份与当前选择相关的公开经历</p></div><button type="button" onClick={() => setEchoContext(currentEchoContext)}>拆开来信 →</button></section>}
-              <details key={`proof-${activeUniverse.code}-${activeRun.currentEvent.id}`} className="wz-universe-proof paper-disclosure" onToggle={(event) => { if (event.currentTarget.open) trackTelemetry('source_open', { routeCode: activeUniverse.code, day: activeRun.currentEvent.day }) }}><summary>这段经历的现实依据 · 查看原文</summary>
-                <header className="wz-proof-header"><div><Quote size={18} weight="fill" /><span>这一路的选择票根</span></div><small>内置 {traceEvidenceItems.length} 条 · 实时 {liveEvidence?.items.length ?? 0} 条 · 原文可查</small></header>
-                <JourneyTickets run={activeRun} />
-                <details className="wz-proof-sources" onToggle={(event) => { if (event.currentTarget.open) trackTelemetry('source_open', { routeCode: activeUniverse.code, day: activeRun.currentEvent.day }) }}>
-                  <summary><span>知乎来源 · 现实回声</span><small>{traceEvidenceItems.length} 条内置{liveEvidence?.items.length ? ` · ${liveEvidence.items.length} 条实时` : ''} · 首屏 3 条<ChevronDown size={12} /></small></summary>
-                  <div className="wz-event-evidence-list">
-                    {featuredTraceEvidence.map((item) => (
-                      <ZhihuPost compact key={item.id ?? `${item.author}-${item.sourceUrl}`} author={item.author} title={item.sourceTitle} badge={item.badge} summary={item.conclusion} sourceUrl={item.sourceUrl} votes={item.votes} />
-                    ))}
-                  {featuredLiveEvidence.map((item) => (
-                    <ZhihuPost compact key={item.id || item.sourceUrl} author={item.author || '知乎用户'} title={item.title} badge={item.badge} summary={item.excerpt || '摘要暂不可用，请打开原文查看完整语境。'} sourceUrl={item.sourceUrl} votes={item.votes} live />
-                  ))}
-                  </div>
-                  {additionalEvidenceCount > 0 && <details className="wz-evidence-more">
-                    <summary>查看其余 {additionalEvidenceCount} 条来源 <ChevronDown size={12} /></summary>
-                    <div className="wz-event-evidence-list">
-                      {additionalTraceEvidence.map((item) => (
-                        <ZhihuPost compact key={item.id ?? `${item.author}-${item.sourceUrl}`} author={item.author} title={item.sourceTitle} badge={item.badge} summary={item.conclusion} sourceUrl={item.sourceUrl} votes={item.votes} />
-                      ))}
-                      {additionalLiveEvidence.map((item) => (
-                        <ZhihuPost compact key={item.id || item.sourceUrl} author={item.author || '知乎用户'} title={item.title} badge={item.badge} summary={item.excerpt || '摘要暂不可用，请打开原文查看完整语境。'} sourceUrl={item.sourceUrl} votes={item.votes} live />
-                      ))}
-                    </div>
-                  </details>}
-                  <div className="wz-live-evidence" aria-live="polite">
-                  <div className="wz-live-evidence-head">
-                    <span><i /> {judgeDemoActive ? '知乎 API 摘录 · 2026-09-14 检索' : '知乎实时检索'}</span>
-                    <small>{judgeDemoActive ? '已保存的公开片段 · 可返回知乎核对' : `仅使用档案类型与通用冲突 · ${formatEvidenceTime(liveEvidence?.retrievedAt)}`}</small>
-                  </div>
-                  {liveEvidenceLoading && <div className="wz-live-evidence-status"><CircleDashed size={14} /> 正在寻找与这个冲突相似的真人经历…</div>}
-                  {liveEvidenceError && (
-                    <div className="wz-live-evidence-status is-error">
-                      <span>实时检索未接通，可先阅读下方已保存的来源片段。</span>
-                      <button type="button" onClick={retryLiveEvidence}>重试</button>
-                    </div>
-                  )}
-                  {!liveEvidenceLoading && !liveEvidenceError && liveEvidence?.items.length === 0 && (
-                    <div className="wz-live-evidence-status">这个抽象处境暂未检索到合适结果，未用低相关内容凑数。</div>
-                  )}
-
-                  </div>
-                </details>
-              </details>
             </article>
 
 

@@ -1,16 +1,11 @@
-import { ArrowLeft, ArrowRight, BookOpen, CaretRight, Check, Paperclip, ThumbsUp } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, BookOpen, CaretRight, Check, Paperclip, Pause, Play, ThumbsUp } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { chooseUniverseFreeAction, chooseUniversePath, isGeneratedActionSource, type GeneratedFreeAction, type SimulationProfile, type UniverseRun } from './simulation'
 import { acceptsNextAction, normalizedAction } from './action-submission'
 import { compareEcho, type EchoContext } from './echo-context'
 import { forkIdentity, keepForkResult, pickForkSource, readForkRecord, type ForkRecord, type ForkResult, type ForkSource } from './fork-comparison'
 import './fork-comparison.css'
-
-const sceneBackgrounds = {
-  A: '/assets/galgame/parttime-blue.png',
-  B: '/assets/galgame/internship-amber.png',
-  C: '/assets/galgame/market-green.png',
-}
+import { galSceneAssets } from './gal-scene-assets'
 
 // Keep the authored story intact, but give each dialogue beat a readable length.
 function dialogueBeats(story: string) {
@@ -38,6 +33,8 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
   })
   const recordRef = useRef(record)
   const [busy, setBusy] = useState('')
+  const [motionPaused, setMotionPaused] = useState(false)
+  const scene = galSceneAssets(run.code, run.currentEvent.day)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(true)
   const controller = useRef<AbortController | null>(null)
@@ -118,14 +115,15 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
       if (mounted.current) { setBusy(''); onBusy(false) }
     }
   }
-  return <section ref={root} className={`fork-workshop gal-scene${choosing ? ' is-choosing' : ''}`} data-universe={run.code} aria-label="纸上故事，试试你的选择">
-    <img className="gal-backdrop" src={sceneBackgrounds[run.code]} alt="" aria-hidden="true" fetchPriority="high" />
+  return <section ref={root} className={`fork-workshop gal-scene${choosing ? ' is-choosing' : ''}`} data-universe={run.code} data-scene-day={scene.stage} aria-label="纸上故事，试试你的选择">
+    <img className="gal-backdrop" src={scene.background} alt="" aria-hidden="true" fetchPriority="high" />
     <header className="gal-chapter">
       <span>第 {run.currentEvent.day} 天 <i aria-hidden="true" /> {routeTitle}</span>
       <h2>{run.currentEvent.title}</h2>
     </header>
     <div className="gal-scene-body">
       <div className="fork-main">
+
         {choosing && !preview && <div className="gal-choice-stack" ref={choicesRef} tabIndex={-1} aria-label="你的选择">
           {choices.map((choice, index) => {
             const tried = results.some(result => result.choiceId === choice.id)
@@ -137,6 +135,15 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
           })}
         </div>}
         <div className={`gal-dialogue ${preview ? 'is-preview' : ''}`} ref={dialogueRef} tabIndex={-1} aria-label={preview ? '试选后续故事' : '当前故事'}>
+        <figure className="gal-mascot">
+          <picture>
+            <source media="(prefers-reduced-motion: reduce)" srcSet={scene.still} />
+            <img src={motionPaused ? scene.still : scene.mascot} alt="陪你读故事的刘看山" width="320" height="320" decoding="async" />
+          </picture>
+          <button className="gal-motion-toggle" type="button" onClick={() => setMotionPaused(!motionPaused)} aria-label={motionPaused ? '播放刘看山动画' : '暂停刘看山动画'} aria-pressed={motionPaused} title={motionPaused ? '播放动画' : '暂停动画'}>
+            {motionPaused ? <Play size={14} weight="fill" aria-hidden="true" /> : <Pause size={14} weight="fill" aria-hidden="true" />}
+          </button>
+        </figure>
           <div className="gal-speaker"><BookOpen size={18} aria-hidden="true" /><span>{preview ? '如果这样选…' : choosing ? '心里想' : '旁白'}</span><small>{preview ? '试选后续' : choosing ? '轮到你了' : `${beat + 1} / ${beats.length}`}</small></div>
           <div className="gal-dialogue-text" aria-live="polite" aria-atomic="true">
             {preview ? <><h3>{preview.run.currentEvent.title}</h3><p>{preview.run.currentEvent.story}</p></> : <p key={beat}>{choosing ? run.currentEvent.tension : beats[beat]}</p>}
