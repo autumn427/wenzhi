@@ -1565,7 +1565,7 @@ function Home({
     const root = homeRef.current
     if (!root) return
     const target = scene === 2
-      ? root.querySelector<HTMLElement>(routeEntered ? '.story-event, .journey-ending' : '.universe-doors h2')
+      ? root.querySelector<HTMLElement>(routeEntered ? '.story-event, .ending-sequence' : '.universe-doors h2')
       : root.querySelector<HTMLElement>(`.wz-view[data-view="${scene}"] h1, .wz-view[data-view="${scene}"] h2`)
     if (!target) return
     // Route tabs retain keyboard focus; a story choice still moves focus to its next scene.

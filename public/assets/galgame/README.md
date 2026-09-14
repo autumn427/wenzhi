@@ -33,3 +33,8 @@
 - 底图仅提供纸雕边缘和留白，节点、主线及未选分支均由真实 run 数据呈现。
 - 点击已走节点查看对应票根和 evidenceIds 匹配的知乎卡片；看旧节点不移动代表实际进度的刘看山。
 - 第 150 天 A 宇宙动作已由 idle 换成 wave；场景角色固定在对白框上沿。
+
+### 180 天票根
+- ending-ticket-paper.png：imagegen 生成三色纸雕旅途，1816×866；提示词同名 .prompt.md。
+- checked-ticket-stamp.png：用户提供的刘看山“已检票”红色印章原素材；页面及 PNG 导出使用 multiply 合成，不重绘。
+- 消费组件 EndingSequence.tsx；标题、宇宙与选择次数来自当前 run。

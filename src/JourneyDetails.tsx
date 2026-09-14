@@ -1,7 +1,7 @@
-import { PaperAccent } from './PaperAccent'
 import { useEffect, useRef, useState } from 'react'
 import type { SimulationState, UniverseRun } from './simulation'
 import './journey-ending-paper-desk.css'
+import { EndingSequence } from './EndingSequence'
 const axes = [['technicalSkill','技术'],['aiCollaboration','AI 协作'],['domainDepth','专业'],['portfolio','作品'],['opportunity','机会'],['energy','精力']] as const
 type PaperIconKind = 'route' | 'radar' | 'insight' | 'metric'
 
@@ -9,9 +9,9 @@ type PaperIconKind = 'route' | 'radar' | 'insight' | 'metric'
 function PaperIcon({ kind }: { kind: PaperIconKind }) {
  return <span className={`paper-icon paper-icon-${kind}`} aria-hidden="true"><i/><i/><i/></span>
 }
-export function StateRadar(props:{run:UniverseRun; baseline?: 'previous' | 'initial'}) {
+export function StateRadar(props:{run:UniverseRun; baseline?: 'previous' | 'initial' | 'timeline'}) {
  const {run} = props
- if (!run.route && run.currentEvent.id.startsWith('campus-')) return <section className="campus-time-notes" aria-label="课余时间与取舍">
+ if (props.baseline !== 'timeline' && !run.route && run.currentEvent.id.startsWith('campus-')) return <section className="campus-time-notes" aria-label="课余时间与取舍">
   <h4>这条路的时间账</h4>
   <p>每周最多留出 {run.state.weeklyHours} 小时 · 课程和小组作业优先</p>
   <p>{run.decisions.length ? `已做 ${run.decisions.length} 次选择。最近一次：${run.decisions[run.decisions.length - 1].tradeoff}` : '先看看排班、出勤或备摊需要多少时间，再决定能接多少。'}</p>
@@ -20,13 +20,13 @@ export function StateRadar(props:{run:UniverseRun; baseline?: 'previous' | 'init
  return <SkillRadar {...props}/>
 }
 
-function SkillRadar({run, baseline = 'previous'}:{run:UniverseRun; baseline?: 'previous' | 'initial'}) {
+function SkillRadar({run, baseline = 'previous'}:{run:UniverseRun; baseline?: 'previous' | 'initial' | 'timeline'}) {
  const canvas=useRef<HTMLCanvasElement>(null)
  const previous=run.decisions[baseline === 'initial' ? 0 : run.decisions.length-1]?.stateBefore
  const radarPalette = { A: { ink: '#287dcc', fillTop: 'rgba(40,125,204,.30)', fillBottom: 'rgba(40,125,204,.10)', label: '蓝色' }, B: { ink: '#c88725', fillTop: 'rgba(200,135,37,.30)', fillBottom: 'rgba(200,135,37,.10)', label: '橙色' }, C: { ink: '#4f8968', fillTop: 'rgba(79,137,104,.30)', fillBottom: 'rgba(79,137,104,.10)', label: '绿色' } } as const
  const routePalette = radarPalette[run.code]
  const routeTitle = run.route?.title ?? ({ A: '去店里兼职', B: '投第一份实习', C: '和朋友摆市集' } as const)[run.code]
- const timelineSnapshots: Array<{key:string;label:string;state:SimulationState}> = baseline === 'initial'
+ const timelineSnapshots: Array<{key:string;label:string;state:SimulationState}> = baseline !== 'previous'
   ? [
     ...(run.decisions[0]?.stateBefore ? [{key:'day-30',label:'30天',state:run.decisions[0].stateBefore}] : []),
     ...run.decisions.flatMap((decision) => {
@@ -38,8 +38,9 @@ function SkillRadar({run, baseline = 'previous'}:{run:UniverseRun; baseline?: 'p
  const [selectedStageKey,setSelectedStageKey]=useState('day-180')
  const selectedSnapshot=timelineSnapshots.find((snapshot)=>snapshot.key===selectedStageKey)
  const displayState=selectedSnapshot?.state ?? run.state
- const comparisonState=baseline === 'initial' && selectedStageKey === 'day-30' ? undefined : previous
- useEffect(()=>{setSelectedStageKey(baseline === 'initial' ? 'day-180' : 'current')},[run.code,run.currentEvent.id,baseline])
+ const priorStageKey:Record<string,string>={'day-90':'day-30','day-150':'day-90','day-180':'day-150'}
+ const comparisonState=baseline === 'timeline' ? timelineSnapshots.find(snapshot=>snapshot.key===priorStageKey[selectedStageKey])?.state : baseline === 'initial' && selectedStageKey === 'day-30' ? undefined : previous
+ useEffect(()=>{setSelectedStageKey(baseline !== 'previous' ? 'day-180' : 'current')},[run.code,run.currentEvent.id,baseline])
  useEffect(()=>{
   const el=canvas.current; if(!el)return
   const ctx=el.getContext('2d');if(!ctx)return
@@ -78,81 +79,8 @@ export function PathHistory({run,initial}:{run:UniverseRun;initial:string}) {
  return <section className="path-history"><div className="paper-section-heading"><PaperIcon kind="route"/><h4>时间线回看</h4></div><p className="history-start"><PaperIcon kind="metric"/><span>起点 · {initial}</span></p><ol className="history-points" aria-label="这条路上的选择时间线">{run.decisions.map(d=><li key={d.eventId}><button type="button" onClick={()=>setSelected(d.eventId)} aria-current={selected===d.eventId ? 'step' : undefined}><PaperIcon kind="route"/><span className="history-copy"><small>第 {d.day} 天 · 回看</small><strong>{d.choiceLabel}</strong></span></button></li>)}<li><button type="button" onClick={()=>setSelected(null)} aria-current={!selected ? 'step' : undefined}><PaperIcon kind="route"/><span className="history-copy"><small>第 {run.currentEvent.day} 天 · 当前</small><strong>{run.currentEvent.title}</strong></span></button></li></ol>{decision&&<article className="history-preview"><span>历史回看 · 选择已锁定</span><h5>{decision.eventTitle}</h5><p>{decision.eventSnapshot?.story??decision.eventTension??'这条旧记录未保存完整故事。'}</p>{decision.eventSnapshot?.choices.map(c=><div key={c.id} className={c.id===decision.choiceId?'was-chosen':''}>{c.id===decision.choiceId?'当时选择：':'另一选项：'}{c.label}</div>)}{!decision.eventSnapshot?.choices.some(c=>c.id===decision.choiceId)&&<p>当时选择：{decision.choiceLabel}</p>}<p>{decision.actionOutcome?.tradeoff??decision.tradeoff}</p></article>}</section>
 }
 
-const routeCardColors: Record<UniverseRun['code'], {ink:string; soft:string}> = { A: {ink:'#315f80',soft:'#e6eef3'}, B: {ink:'#aa762d',soft:'#f3ead8'}, C: {ink:'#486c52',soft:'#e5eee5'} }
-const cardLines = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
- const lines: string[] = []; let line = ''
- for (const char of text) { const next = line + char; if (line && ctx.measureText(next).width > maxWidth) { lines.push(line); line = char } else line = next }
- if (line) lines.push(line)
- return lines
-}
-const drawCardRadar = (ctx: CanvasRenderingContext2D, run: UniverseRun, baseline?: SimulationState) => {
- const cx = 600, cy = 900, radius = 205
- const routeInk = routeCardColors[run.code].ink
- const routeFill = run.code === 'A' ? 'rgba(49,95,128,.22)' : run.code === 'B' ? 'rgba(170,118,45,.22)' : 'rgba(72,108,82,.22)'
- const point = (i:number,v:number,r=radius) => { const a=i*Math.PI/3-Math.PI/2; const value=Math.max(0,Math.min(100,v)); return [cx+Math.cos(a)*r*value/100,cy+Math.sin(a)*r*value/100] as const }
- const atScale = (i:number,r:number) => { const a=i*Math.PI/3-Math.PI/2; return [cx+Math.cos(a)*r,cy+Math.sin(a)*r] as const }
- const polygon = (state: SimulationState, stroke:string, fill:string, dash:number[] = []) => { const pts=axes.map(([key],i)=>point(i,state[key])); ctx.beginPath(); pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y)); ctx.closePath(); ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=4;ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([]) }
- const outer=axes.map((_,i)=>atScale(i,265));ctx.beginPath();outer.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.save();ctx.translate(7,10);ctx.fillStyle='rgba(111,84,52,.12)';ctx.fill();ctx.restore();ctx.fillStyle='#f4eadb';ctx.fill();ctx.strokeStyle='#d2c1a8';ctx.lineWidth=3;ctx.stroke();
- for(let level=100;level>=20;level-=20){const pts=axes.map((_,i)=>point(i,level));ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=level%40===0?'rgba(255,255,255,.20)':'rgba(239,230,214,.15)';ctx.fill();ctx.strokeStyle='#d8cdbd';ctx.lineWidth=2;ctx.stroke()}
- axes.forEach(([key,label],i)=>{const [x,y]=point(i,100);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.strokeStyle='#d8cdbd';ctx.lineWidth=2;ctx.stroke();const [tx,ty]=atScale(i,245);ctx.font='600 25px "Noto Serif SC", serif';ctx.fillStyle='#514638';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,tx,ty)})
- if (baseline) polygon(baseline,'#c34d48','rgba(195,77,72,.10)',[10,7]); polygon(run.state,routeInk,routeFill)
- axes.forEach(([key],i)=>{const value=run.state[key];const [x,y]=atScale(i,Math.max(54,radius*value/100+22));ctx.font='700 18px "Noto Serif SC", serif';ctx.textAlign='center';ctx.textBaseline='middle';const w=ctx.measureText(String(value)).width+18;ctx.fillStyle='rgba(255,252,244,.95)';ctx.fillRect(x-w/2,y-15,w,30);ctx.fillStyle=routeInk;ctx.fillText(String(value),x,y)})
-}
-const resultCardBlob = (run: UniverseRun, endingMetrics: Array<{label:string;gain:number|null}>): Promise<Blob|null> => new Promise(resolve => {
- const canvas = document.createElement('canvas'); canvas.width=1200; canvas.height=1500; const ctx=canvas.getContext('2d'); if(!ctx){resolve(null);return}
- if (!run.route && run.currentEvent.id.startsWith('campus-')) {
-  ctx.fillStyle='#faf5eb';ctx.fillRect(0,0,1200,1500);ctx.textAlign='left';ctx.textBaseline='alphabetic'
-  ctx.fillStyle=routeCardColors[run.code].ink;ctx.font='600 34px serif';ctx.fillText(`问枝 · 校园试玩 · 宇宙 ${run.code}`,80,100)
-  let y=185
-  const paragraph=(text:string,font:string,lineHeight:number)=>{ctx.font=font;for(const line of cardLines(ctx,text,1040)){ctx.fillText(line,80,y);y+=lineHeight}y+=24}
-  paragraph(run.currentEvent.title,'600 44px serif',60)
-  ctx.fillStyle='#514638';paragraph(run.currentEvent.story,'28px serif',44)
-  run.decisions.forEach(d=>paragraph(`第${d.day}天：${d.choiceLabel}。${d.tradeoff ?? ''}`,'25px serif',38))
-  ctx.fillStyle='#756954';ctx.font='22px serif';ctx.fillText('虚构试玩 · 从选择里留下一件小事，回到现实试七天',80,1450)
-  canvas.toBlob(resolve,'image/png');return
- }
- const colors=routeCardColors[run.code]; ctx.fillStyle='#faf5eb';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle=colors.ink;ctx.fillRect(0,0,canvas.width,22)
- ctx.fillStyle='#756954';ctx.font='500 28px "Noto Serif SC", serif';ctx.fillText(`问枝 · 宇宙 ${run.code}`,80,100);ctx.fillStyle='#2b2925';ctx.font='600 58px "Noto Serif SC", serif';ctx.fillText('走过这半年',80,180)
- ctx.fillStyle=colors.soft;ctx.fillRect(80,220,1040,76);ctx.fillStyle=colors.ink;ctx.font='600 30px "Noto Serif SC", serif';ctx.fillText(run.currentEvent.title,108,270)
- ctx.fillStyle='#514638';ctx.font='400 28px "Noto Serif SC", serif';let y=360;for(const line of cardLines(ctx,run.currentEvent.story,980)){ctx.fillText(line,80,y);y+=48;if(y>620)break}
- drawCardRadar(ctx,run,run.decisions[0]?.stateBefore); ctx.fillStyle='#756954';ctx.font='500 24px "Noto Serif SC", serif';const routeLabel=run.code==='A'?'蓝色':run.code==='B'?'橙色':'绿色';ctx.fillText(`${routeLabel} · 最终    红色 · 起始    宇宙 ${run.code} 路线`,80,1165)
- ctx.fillStyle='#2b2925';ctx.font='600 28px "Noto Serif SC", serif';ctx.fillText('关键变化',80,1235);ctx.font='500 25px "Noto Serif SC", serif';endingMetrics.forEach(({label,gain},i)=>{const col=i%3,row=Math.floor(i/3);const x=80+col*350, yy=1285+row*70;ctx.fillStyle='#756954';ctx.fillText(label,x,yy);ctx.fillStyle=gain===null?'#756954':gain>0?'#258458':gain<0?'#c34d48':'#756954';ctx.font='600 28px "Noto Serif SC", serif';ctx.fillText(gain===null?'—':`${gain>0?'+':''}${gain}`,x+170,yy);ctx.font='500 25px "Noto Serif SC", serif'})
- ctx.fillStyle='#9a8b76';ctx.font='400 20px "Noto Serif SC", serif';ctx.fillText('规则驱动的互动模拟 · 不代表现实预测',80,1450);canvas.toBlob(resolve,'image/png')
-})
-
 export function JourneyEnding({run,onContinue,continueLabel,onReplay}:{run:UniverseRun;onContinue:()=>void;continueLabel:string;onReplay?:()=>void}) {
- const [shareState,setShareState]=useState<'idle'|'copied'|'shared'|'downloaded'>('idle')
- useEffect(()=>{document.querySelector('.wz-view.wz-universes')?.scrollTo({top:0,behavior:'instant'})},[run.code])
- const campus = !run.route && run.currentEvent.id.startsWith('campus-')
- const first=run.decisions[0]?.stateBefore
- const ranking=axes.filter(([key])=>key!=='energy').map(([key,label])=>({key,label,gain:first?run.state[key]-first[key]:0})).sort((a,b)=>b.gain-a.gain)
- const growth=ranking[0]
- const keyDecision=[...run.decisions].sort((a,b)=>(b.delta[growth.key]??0)-(a.delta[growth.key]??0))[0]
- const outward=run.decisions.filter(d=>(d.delta.portfolio??0)>0 || (d.delta.opportunity??0)>0)
- const cost=[...run.decisions].sort((a,b)=>(a.delta.energy??0)-(b.delta.energy??0))[0]
- const endingMetrics=(campus ? [] : axes).map(([key,label])=>({key,label,gain:first ? run.state[key]-first[key] : null}))
- const downloadCard=async()=>{const blob=await resultCardBlob(run,endingMetrics);if(!blob)return;const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`wenzhi-${run.code}-180-days.png`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setShareState('downloaded')}
- const shareResult=async()=>{
-  const changes=endingMetrics.filter(({gain})=>gain!==null).map(({label,gain})=>`${label} ${gain! > 0 ? '+' : ''}${gain}`).join(' · ')
-  const text=[`问枝 · 宇宙 ${run.code} · ${run.currentEvent.title}`,`180天后：${run.currentEvent.story}`,campus ? `你的选择：${run.decisions.map(d=>d.choiceLabel).join(' → ')}` : `这条路的变化：${changes || '暂无起始记录'}`,`这是一段规则驱动的互动模拟，不是现实预测。`].join('\n')
-  const shareApi=navigator as Navigator & { share?: (data:{title?:string;text?:string;files?:File[]})=>Promise<void>; canShare?: (data:{files?:File[]})=>boolean }
-  try {
-   const blob=await resultCardBlob(run,endingMetrics); const file=blob ? new File([blob],`wenzhi-${run.code}-180-days.png`,{type:'image/png'}) : null
-   if (shareApi.share && file && shareApi.canShare?.({files:[file]})) { await shareApi.share({title:`问枝 · 宇宙 ${run.code}`,text,files:[file]}); setShareState('shared'); return }
-   if (blob) { await downloadCard(); return }
-   await navigator.clipboard.writeText(text); setShareState('copied')
-  } catch { setShareState('idle') }
- }
- const observations=campus ? run.decisions.map((decision,index)=>({title: ['你最先回复了什么', '后来怎样调整', '最后留下的取舍'][index], body: `你选择“${decision.choiceLabel}”。${decision.tradeoff ?? ''}`})) : [
-  {title:'你把投入放在了哪里',body:first && growth.gain>0 ? `这条路线里，${growth.label}的变化最明显。“${keyDecision?.choiceLabel}”是其中一次具体投入。` : '这条路线没有显示出明确的能力增长。行动留下的线索，比急着给自己下结论更有用。'},
-  {title:'你怎样让事情往前走',body:outward.length ? `有 ${outward.length} 次选择把精力用在作品或外部机会。“${outward[outward.length-1].choiceLabel}”让这条路从想法走向了具体行动。` : `“${run.decisions[run.decisions.length-1]?.choiceLabel ?? '继续探索'}”保留了你的方向。这段经历里，外部反馈仍然有限。`},
-  {title:'你为这条路付出了什么',body:!first ? '这条旧记录没有起始快照，无法判断精力的整体变化。可以回看已保存的行动与代价。' : run.state.energy<first.energy ? `精力比出发时更少了。“${cost?.choiceLabel}”也占用了你的余力；这些投入能否长期维持，值得带回现实再试一试。` : '到结束时，你仍保留了起始的精力水平。这条路上的取舍，没有表现为持续透支；其他代价仍要结合现实判断。'},
- ]
- return <section className="journey-ending ending-paper-desk" tabIndex={-1} aria-label="这条路线的故事结尾">
-  <header className="ending-desk-header"><PaperAccent kind="return-envelope" placement="ending" /><div className="ending-desk-meta"><span className="ending-desk-stamp">RETURN / 180</span><span>宇宙 {run.code} · 第 180 天</span></div><h2>{run.currentEvent.title}</h2><p>{run.currentEvent.story}</p><aside className="ending-envelope-note" aria-label="返程信笺"><span>返程信笺</span><strong>把这段旅程带回现实</strong><p>留下一件小事，试 7 天再回来。</p><b>已封存</b></aside></header>
-  <div className="ending-desk-board"><div className="ending-desk-line" aria-hidden="true"/><div className="ending-desk-index ending-desk-index-reflection" aria-hidden="true"><b>01</b><span>回望选择</span></div><div className="ending-desk-index ending-desk-index-radar" aria-hidden="true"><b>02</b><span>读取变化</span></div><div className="ending-reflection"><div><div className="paper-section-heading"><PaperIcon kind="insight"/><h3>从你的选择里，看到了这些</h3></div><ol>{observations.map((o,index)=><li key={o.title}><PaperIcon kind={index === 1 ? 'route' : index === 2 ? 'metric' : 'insight'}/><div><h4>{o.title}</h4><p>{o.body}</p></div></li>)}</ol></div><div className={`ending-radar-column route-tone-${run.code.toLowerCase()}`}><StateRadar run={run} baseline="initial"/>{!campus && <><div className="ending-metrics" aria-label="这条路线的半年变化">{endingMetrics.map(({key,label,gain})=><div className={gain === null ? '' : gain > 0 ? 'up' : gain < 0 ? 'down' : 'flat'} key={key}><PaperIcon kind="metric"/><span><small>{label}</small><strong>{gain === null ? '—' : `${gain > 0 ? '+' : ''}${gain}`}</strong></span></div>)}</div><p className="ending-metrics-note">数值只用于回看这次模拟，不代表现实能力测评。</p></>}</div></div></div>
-  <footer className="ending-desk-footer"><small>{continueLabel.includes('实验') ? '把一件小事带回现实，试 7 天再回来。' : '再走一条路，比较不同取舍。'}</small><div className="journey-ending-actions">{onReplay && <button className="ending-share ending-replay" type="button" onClick={onReplay}>重新走一遍</button>}<button className="ending-share" type="button" onClick={() => void shareResult()}>{shareState === 'shared' ? '已打开分享' : shareState === 'copied' ? '结果已复制' : shareState === 'downloaded' ? '结果卡已下载' : '分享结果卡'}</button><button className="ending-share ending-card-download" type="button" onClick={() => void downloadCard()}>下载 PNG</button><button className="paper-primary" onClick={onContinue}>{continueLabel}</button></div></footer>
- </section>
+ return <EndingSequence key={`${run.code}-${run.currentEvent.id}`} run={run} onContinue={onContinue} continueLabel={continueLabel} onReplay={onReplay} radar={<StateRadar run={run} baseline="timeline"/>}/>
 }
 
 const ticketLabels: Record<string, string> = {technicalSkill:'技术',aiCollaboration:'AI 协作',domainDepth:'专业',portfolio:'作品',opportunity:'机会',confidence:'信心',energy:'精力',weeklyHours:'投入'}
