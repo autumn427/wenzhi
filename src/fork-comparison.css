@@ -86,8 +86,22 @@
   .paper-experience .gal-choice-stack > button { transition: none; }
 }
 /* Keep the full choice state within the scene. */
+.paper-experience .gal-choice-stack { align-self: flex-end; width: min(calc(100% - 172px), 700px); margin-bottom: -48px; }
+.paper-experience .gal-custom-action .wz-free-action { width: 100%; max-width: none; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; clip-path: none; }
+.paper-experience .gal-custom-action .wz-free-action::before { display: none; }
+.paper-experience .gal-custom-action .wz-free-action-toggle { display: none; }
+.paper-experience .gal-custom-action .wz-free-action form { margin: 0; padding: 0; border: 0; display: grid; gap: 12px; }
+.paper-experience .gal-custom-action .wz-free-action textarea { width: 100%; min-height: 110px; resize: vertical; padding: 14px; color: #493f30; background: #fffdf4; border: 1px solid #cdbb98; border-radius: 2px; font: 16px/1.75 var(--font-body,sans-serif); }
+.paper-experience .gal-custom-action .wz-free-action form > label { font-size: 14px; }
+.paper-experience .gal-custom-action .wz-backup-consent { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; line-height: 1.65; color: #7b6b51; }
+.paper-experience .gal-custom-action .wz-backup-consent input { flex-shrink: 0; margin-top: 4px; }
+.paper-experience .gal-custom-action .wz-free-action form footer { display: flex; gap: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.paper-experience .gal-custom-action .wz-free-action form footer small { flex: 1 1 230px; font-size: 11px; color: #82735b; }
+.paper-experience .gal-custom-action .wz-free-action button[type=submit] { padding: 10px 16px; border: 1px solid var(--universe-deep); background: var(--universe-deep); color: #fff9ec; font-size: 14px; }
+.paper-experience .gal-custom-action [role=alert] { color: #9f382f; }
 .paper-experience .gal-scene.is-choosing .fork-main { padding-top: 0; }
 .paper-experience .gal-dialogue:focus, .paper-experience .gal-choice-stack:focus { outline: none; }
 @media (max-width: 760px) {
+  .paper-experience .gal-choice-stack { width: 100%; margin-bottom: -12px; }
   .paper-experience .gal-scene.is-choosing .fork-main { padding-top: 20px; }
 }

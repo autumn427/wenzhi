@@ -1496,7 +1496,6 @@ function Home({
   const restoreBeforeDemoRef = useRef<(() => void) | null>(null)
   const [quickArrival, setQuickArrival] = useState<{ code: UniverseCode; choice: string } | null>(null)
   const [choiceImpact, setChoiceImpact] = useState<ChoiceImpact | null>(null)
-  const [forkBypass, setForkBypass] = useState('')
   const demoForkRecords = useRef(new Map<string, ForkRecord>())
   const [impactSceneStep, setImpactSceneStep] = useState(0)
   const [echoContext, setEchoContext] = useState<EchoContext | null>(null)
@@ -1516,7 +1515,7 @@ function Home({
   const activeRun = universeRuns[activeUniverse.code]
   const forkKey = forkIdentity(activeRun, simulationProfile, simulationCycle)
   const forkEligible = activeRun.currentEvent.day < 180 && activeRun.currentEvent.choices.length === 2
-    && (Boolean(activeRun.route) || activeRun.currentEvent.id.startsWith('campus-')) && forkBypass !== forkKey
+    && (Boolean(activeRun.route) || activeRun.currentEvent.id.startsWith('campus-'))
   const previousDecision = activeRun.decisions[activeRun.decisions.length - 1]
   const currentEchoContext: EchoContext = {
     code: activeUniverse.code,
@@ -2543,6 +2542,60 @@ function Home({
     setScene(2)
   }
 
+  const freeActionPanel = (
+<section className={`wz-free-action ${freeActionOpen ? 'is-open' : ''} ${freeActionPending ? 'is-writing' : ''}`}>
+                    <button
+                      className="wz-free-action-toggle"
+                      type="button"
+                      disabled={freeActionPending}
+                      aria-expanded={freeActionOpen}
+                      onClick={() => {
+                        setFreeActionOpen((current) => !current)
+                        setFreeActionError(null)
+                      }}
+                    >
+                      <span>我有别的做法</span>
+                      <ArrowRight size={22} aria-hidden="true" />
+                    </button>
+                    {freeActionPending && <p className="story-writing-status" role="status">正在根据这次选择续写故事，请稍候…</p>}
+                    {freeActionOpen && !liveAiActive && <p role="status">示例模式暂不续写自定义行动，返回后可选择两种做法继续故事。</p>}
+                    {freeActionOpen && liveAiActive && (
+                      <form onSubmit={submitFreeAction}>
+                        <label htmlFor={`free-action-${activeUniverse.code}`}>换作我，我会这样做：</label>
+                        <textarea
+                          id={`free-action-${activeUniverse.code}`}
+                          value={freeAction}
+                          maxLength={240}
+                          disabled={freeActionPending}
+                          aria-describedby={freeActionError ? `free-action-error-${activeUniverse.code}` : undefined}
+                          placeholder="例如：先把课表发过去，说明周末只空半天，再确认任务和结束时间。"
+                          onChange={(inputEvent) => {
+                            updateActionDraft(inputEvent.target.value)
+                            if (freeActionError) setFreeActionError(null)
+                          }}
+                        />
+                        <label className="wz-backup-consent">
+                          <input type="checkbox" checked={allowThirdPartyFallback} disabled={freeActionPending} onChange={event => setAllowThirdPartyFallback(event.target.checked)} />
+                          <span>允许主模型不可用时，将本次处境、行动和本路线剧情发送至 Yeako 备用 AI。请勿填写隐私信息。</span>
+                        </label>
+                        <footer>
+                          <small role={freeActionPending ? 'status' : undefined}>{freeActionPending
+                            ? '正在续写并校验；必要时修复一次。通过后才推进剧情，失败保留这一笔。'
+                            : `${freeAction.length} / 240 · ${draftSaved ? '草稿保存在本机，刷新后可继续' : '浏览器未能保存草稿，请先复制文字'}；成功后才推进剧情`}</small>
+                          <button type="submit" disabled={freeActionPending || freeAction.trim().length < 6 || (isAiCollaborationWorkSample && !workSample.evidence)}>
+                            {freeActionPending
+                              ? '正在等待 AI 续写…'
+                              : freeActionError ? freeActionError.retryLabel : '就按我写的往下走'}
+                            {freeActionPending ? <CircleDashed size={15} /> : <Send size={15} weight="fill" />}
+                          </button>
+                        </footer>
+                        {freeActionError && !freeActionPending && <button type="button" onClick={() => homeRef.current?.querySelector<HTMLTextAreaElement>('.wz-free-action textarea')?.focus()}>修改行动</button>}
+                        {freeActionError && <p id={`free-action-error-${activeUniverse.code}`} role="alert">{freeActionError.message}</p>}
+                      </form>
+                    )}
+                  </section>
+  )
+
   return (
     <main className={`wz-home paper-experience wz-scene-${scene} ${isUniverseOpen ? `is-universe-open universe-${activeUniverse.code.toLowerCase()}` : ''} ${reading.isGap ? 'is-gap' : 'has-answers'}`} ref={homeRef}>
       {echoContext && <RealityEchoLetter savedLetters={judgeDemoActive ? campusSources.filter(item => item.id.startsWith(`campus-${echoContext.code.toLowerCase()}`)) : undefined} context={echoContext} onClose={() => setEchoContext(null)} onAdjust={scene === 2 && activeRun.currentEvent.day < 180 ? () => {
@@ -2636,7 +2689,8 @@ function Home({
               {routeEntered && scene === 2 && forkEligible && <ForkComparison key={forkKey} run={activeRun} profile={simulationProfile} cycle={simulationCycle}
                 demo={judgeDemoActive} demoRecords={demoForkRecords.current} live={liveAiActive} context={currentEchoContext} evidence={liveEvidence?.items ?? []}
                 sourceLoading={liveEvidenceLoading} sourceError={liveEvidenceError} allowFallback={allowThirdPartyFallback} onBusy={setFreeActionPending}
-                onRetrySource={retryLiveEvidence} onCustom={() => { setForkBypass(forkKey); setFreeActionOpen(true) }}
+                onRetrySource={retryLiveEvidence} onCustom={() => { setFreeActionOpen(true); setFreeActionError(null) }}
+                customOpen={freeActionOpen} customAction={freeActionPanel} customPending={freeActionPending} onCloseCustom={() => setFreeActionOpen(false)}
                 onCommit={next => {
                   if (!judgeDemoActive) saveLocal(window.localStorage, simulationStorageKey(simulationProfile), { ...universeRuns, [activeUniverse.code]: next })
                   setUniverseRuns(current => current[activeUniverse.code] === activeRun ? { ...current, [activeUniverse.code]: next } : current)
@@ -2644,57 +2698,7 @@ function Home({
                   trackTelemetry('choice_made', { routeCode: activeUniverse.code, day: activeRun.currentEvent.day })
                 }} />}
               {routeEntered && scene === 2 && !forkEligible && activeRun.currentEvent.day !== 180 && <StoryEventCard code={activeUniverse.code} day={activeRun.currentEvent.day} previousResult={previousResult} tension={activeRun.currentEvent.tension} story={activeRun.currentEvent.story} title={activeRun.currentEvent.title} choices={activeRun.currentEvent.choices} disabled={freeActionPending || (isAiCollaborationWorkSample && !workSample.evidence)} needsWork={isAiCollaborationWorkSample && !workSample.evidence} onChoose={choosePath} customAction={activeRun.currentEvent.choices.length > 0 && (
-                  <section className={`wz-free-action ${freeActionOpen ? 'is-open' : ''} ${freeActionPending ? 'is-writing' : ''}`}>
-                    <button
-                      className="wz-free-action-toggle"
-                      type="button"
-                      disabled={freeActionPending}
-                      aria-expanded={freeActionOpen}
-                      onClick={() => {
-                        setFreeActionOpen((current) => !current)
-                        setFreeActionError(null)
-                      }}
-                    >
-                      <span>我有别的做法</span>
-                      <ArrowRight size={22} aria-hidden="true" />
-                    </button>
-                    {freeActionPending && <p className="story-writing-status" role="status">正在根据这次选择续写故事，请稍候…</p>}
-                    {freeActionOpen && !liveAiActive && <p role="status">示例模式暂不续写自定义行动，请选择上方两种做法继续故事。</p>}
-                    {freeActionOpen && liveAiActive && (
-                      <form onSubmit={submitFreeAction}>
-                        <label htmlFor={`free-action-${activeUniverse.code}`}>换作我，我会这样做：</label>
-                        <textarea
-                          id={`free-action-${activeUniverse.code}`}
-                          value={freeAction}
-                          maxLength={240}
-                          disabled={freeActionPending}
-                          aria-describedby={freeActionError ? `free-action-error-${activeUniverse.code}` : undefined}
-                          placeholder="例如：先把课表发过去，说明周末只空半天，再确认任务和结束时间。"
-                          onChange={(inputEvent) => {
-                            updateActionDraft(inputEvent.target.value)
-                            if (freeActionError) setFreeActionError(null)
-                          }}
-                        />
-                        <label className="wz-backup-consent">
-                          <input type="checkbox" checked={allowThirdPartyFallback} disabled={freeActionPending} onChange={event => setAllowThirdPartyFallback(event.target.checked)} />
-                          <span>允许主模型不可用时，将本次处境、行动和本路线剧情发送至 Yeako 备用 AI。请勿填写隐私信息。</span>
-                        </label>
-                        <footer>
-                          <small role={freeActionPending ? 'status' : undefined}>{freeActionPending
-                            ? '正在续写并校验；必要时修复一次。通过后才推进剧情，失败保留这一笔。'
-                            : `${freeAction.length} / 240 · ${draftSaved ? '草稿保存在本机，刷新后可继续' : '浏览器未能保存草稿，请先复制文字'}；成功后才推进剧情`}</small>
-                          <button type="submit" disabled={freeActionPending || freeAction.trim().length < 6 || (isAiCollaborationWorkSample && !workSample.evidence)}>
-                            {freeActionPending
-                              ? '正在等待 AI 续写…'
-                              : freeActionError ? freeActionError.retryLabel : '就按我写的往下走'}
-                            {freeActionPending ? <CircleDashed size={15} /> : <Send size={15} weight="fill" />}
-                          </button>
-                        </footer>
-                        {freeActionError && !freeActionPending && <button type="button" onClick={() => homeRef.current?.querySelector<HTMLTextAreaElement>('.wz-free-action textarea')?.focus()}>修改行动</button>}
-                        {freeActionError && <p id={`free-action-error-${activeUniverse.code}`} role="alert">{freeActionError.message}</p>}
-                      </form>
-                    )}
-                  </section>
+                  freeActionPanel
                 )} />}
               {routeEntered && scene === 2 && activeRun.currentEvent.day === 180 && <JourneyEnding run={activeRun} onContinue={() => takeFirstExperiment(activeRun)} onReplay={replayCurrentJourney} continueLabel="带走 7 天实验"/>}
               <div className={`wz-universe-story ${activeRun.currentEvent.day === 180 ? 'is-ended' : ''}`} id={`universe-story-${activeUniverse.code}`}>

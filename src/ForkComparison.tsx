@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, BookOpen, CaretRight, Check, Paperclip, Pause, Play, ThumbsUp } from '@phosphor-icons/react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { chooseUniverseFreeAction, chooseUniversePath, isGeneratedActionSource, type GeneratedFreeAction, type SimulationProfile, type UniverseRun } from './simulation'
 import { acceptsNextAction, normalizedAction } from './action-submission'
 import { compareEcho, type EchoContext } from './echo-context'
@@ -19,11 +19,12 @@ function dialogueBeats(story: string) {
   return beats.length ? beats : ['这一刻，你停下来想了想。']
 }
 
-export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, evidence, sourceLoading, sourceError, context, allowFallback, onBusy, onCommit, onCustom, onRetrySource }: {
+export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, evidence, sourceLoading, sourceError, context, allowFallback, onBusy, onCommit, onCustom, onRetrySource, customOpen, customAction, customPending, onCloseCustom }: {
   run: UniverseRun; profile: SimulationProfile; cycle: number; demo: boolean; live: boolean;
   demoRecords: Map<string, ForkRecord>;
   evidence: ForkSource[]; sourceLoading: boolean; sourceError: string; context: EchoContext; allowFallback: boolean;
   onBusy: (busy: boolean) => void; onCommit: (run: UniverseRun) => void; onCustom: () => void; onRetrySource: () => void;
+  customOpen: boolean; customAction: ReactNode; customPending: boolean; onCloseCustom: () => void;
 }) {
   const identity = forkIdentity(run, profile, cycle)
   const storageKey = `wenzhi:fork:v1:${JSON.stringify([profile, cycle, run.code])}`
@@ -52,6 +53,9 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
   const preview = results.find(result => result.choiceId === previewChoice)
   const choosing = beat >= beats.length
   const routeTitle = run.route?.title ?? ({ A: '去店里兼职', B: '投第一份实习', C: '和朋友摆市集' }[run.code])
+  useEffect(() => {
+    if (customOpen) root.current?.querySelector<HTMLTextAreaElement>('textarea')?.focus({ preventScroll: true })
+  }, [customOpen])
   useEffect(() => {
     if (previewChoice) dialogueRef.current?.focus({ preventScroll: true })
     else if (choosing) choicesRef.current?.focus({ preventScroll: true })
@@ -124,7 +128,7 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
     <div className="gal-scene-body">
       <div className="fork-main">
 
-        {choosing && !preview && <div className="gal-choice-stack" ref={choicesRef} tabIndex={-1} aria-label="你的选择">
+        {choosing && !preview && !customOpen && <div className="gal-choice-stack" ref={choicesRef} tabIndex={-1} aria-label="你的选择">
           {choices.map((choice, index) => {
             const tried = results.some(result => result.choiceId === choice.id)
             return <button type="button" key={choice.id} disabled={Boolean(busy)} onClick={() => tried ? setPreviewChoice(choice.id) : void tryChoice(choice.id)}>
@@ -134,7 +138,7 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
             </button>
           })}
         </div>}
-        <div className={`gal-dialogue ${preview ? 'is-preview' : ''}`} ref={dialogueRef} tabIndex={-1} aria-label={preview ? '试选后续故事' : '当前故事'}>
+        <div className={`gal-dialogue ${customOpen ? 'gal-custom-action' : preview ? 'is-preview' : ''}`} ref={dialogueRef} tabIndex={-1} aria-label={customOpen ? '写下我的做法' : preview ? '试选后续故事' : '当前故事'}>
         <figure className="gal-mascot">
           <picture>
             <source media="(prefers-reduced-motion: reduce)" srcSet={scene.still} />
@@ -144,15 +148,17 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
             {motionPaused ? <Play size={14} weight="fill" aria-hidden="true" /> : <Pause size={14} weight="fill" aria-hidden="true" />}
           </button>
         </figure>
-          <div className="gal-speaker"><BookOpen size={18} aria-hidden="true" /><span>{preview ? '如果这样选…' : choosing ? '心里想' : '旁白'}</span><small>{preview ? '试选后续' : choosing ? '轮到你了' : `${beat + 1} / ${beats.length}`}</small></div>
+          <div className="gal-speaker"><BookOpen size={18} aria-hidden="true" /><span>{customOpen ? '我想这样做' : preview ? '如果这样选…' : choosing ? '心里想' : '旁白'}</span><small>{customOpen ? '自己的选择' : preview ? '试选后续' : choosing ? '轮到你了' : `${beat + 1} / ${beats.length}`}</small></div>
+          {customOpen ? customAction : <>
           <div className="gal-dialogue-text" aria-live="polite" aria-atomic="true">
             {preview ? <><h3>{preview.run.currentEvent.title}</h3><p>{preview.run.currentEvent.story}</p></> : <p key={beat}>{choosing ? run.currentEvent.tension : beats[beat]}</p>}
           </div>
           {preview && <details className="gal-outcome-detail"><summary>看看这次选择的取舍</summary><p>{preview.cost}</p><p>{preview.remaining}</p><small>{preview.sourceIds.length ? '知乎摘录仅作参照。' : '后续为虚构模拟。'} {demo ? '试玩记录仅在本次页面内保留。' : saved ? '已保存在当前浏览器。' : '浏览器未能保存，请保留当前页面。'}</small></details>}
           {busy && <p className="gal-status" role="status">正在展开下一幕…</p>}
           {error && <p className="fork-error" role="alert">{error}</p>}
+          </>}
           <footer className="gal-dialogue-actions">
-            {preview ? <>
+            {customOpen ? <button type="button" className="gal-text-button" disabled={customPending} onClick={() => { setBeat(beats.length); onCloseCustom() }}><ArrowLeft size={16} />回到两个选择</button> : preview ? <>
               <button type="button" className="gal-text-button" onClick={() => setPreviewChoice(null)}><ArrowLeft size={16} />回到选择</button>
               <button type="button" className="gal-next" disabled={Boolean(busy)} onClick={() => onCommit(structuredClone(preview.run))}>沿这个选择继续 <ArrowRight size={18} /></button>
             </> : choosing ? <>
