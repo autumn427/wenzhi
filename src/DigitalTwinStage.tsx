@@ -17,9 +17,9 @@ type Props = {
 }
 
 const palette: Record<UniverseCode, { css: string; label: string }> = {
-  A: { css: '#2478d7', label: '系统学习' },
-  B: { css: '#c8872d', label: 'AI 协作' },
-  C: { css: '#47775a', label: '专业深耕' },
+  A: { css: '#2478d7', label: '去店里兼职' },
+  B: { css: '#c8872d', label: '投第一份实习' },
+  C: { css: '#47775a', label: '和朋友摆市集' },
 }
 
 const nodePositions: Record<TwinNode, { left: string; top: string }> = {
@@ -246,9 +246,9 @@ export function DigitalTwinStage({ code, day, eventTitle, evidenceCount, state }
       </aside>
 
       <div className="digital-twin-universe-tabs" aria-hidden="true">
-        <span className={code === 'A' ? 'active' : ''}>A · 系统学习</span>
-        <span className={code === 'B' ? 'active' : ''}>B · AI 协作</span>
-        <span className={code === 'C' ? 'active' : ''}>C · 专业深耕</span>
+        <span className={code === 'A' ? 'active' : ''}>A · 去店里兼职</span>
+        <span className={code === 'B' ? 'active' : ''}>B · 投第一份实习</span>
+        <span className={code === 'C' ? 'active' : ''}>C · 和朋友摆市集</span>
       </div>
     </section>
   )

@@ -33,6 +33,58 @@
 .paper-landing .paper-scroll { z-index: 9; box-shadow: 0 3px 0 rgba(101,79,47,.13); }
 
 /* Route cards read like three hinged paper doors. */
+.paper-experience .paper-landing .paper-paths {
+  min-height: auto;
+  padding-block: clamp(44px, 5vw, 68px);
+}
+.paper-landing .paper-paths-intro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: .9fr 1.3fr;
+  align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+  width: min(1120px, 100%);
+  margin: 0 auto 32px;
+}
+.paper-experience .paper-landing .paper-paths-heading h2 {
+  margin: 0;
+  font-size: clamp(25px, 2.5vw, 36px);
+  line-height: 1.4;
+  letter-spacing: -.035em;
+  text-align: left;
+}
+.paper-landing .paper-demo-context {
+  padding-left: clamp(22px, 3vw, 40px);
+  border-left: 1px solid #c9bba7;
+  color: #6d5d49;
+  text-align: left;
+}
+.paper-landing .paper-demo-context h3 {
+  margin: 0 0 10px;
+  font: 600 clamp(16px, 1.35vw, 20px)/1.5 var(--display);
+  white-space: nowrap;
+  color: #41382d;
+}
+.paper-landing .paper-demo-context p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.85;
+  text-wrap: pretty;
+}
+.paper-landing .paper-demo-ending { white-space: nowrap; }
+.paper-experience .paper-landing .paper-paths-footer {
+  margin-top: 26px;
+  padding-top: 20px;
+}
+@media (max-width: 1000px) {
+  .paper-landing .paper-paths-intro { grid-template-columns: 1fr; gap: 18px; margin-bottom: 24px; }
+  .paper-experience .paper-landing .paper-paths-heading h2 { font-size: 27px; }
+  .paper-landing .paper-demo-context { padding: 16px 0 0; border-left: 0; border-top: 1px solid #c9bba7; }
+}
+@media (max-width: 600px) {
+  .paper-landing .paper-demo-context h3 { white-space: normal; text-wrap: balance; }
+}
 .paper-landing .paper-route-list { align-items: stretch; }
 .paper-landing .paper-route { position: relative; min-height: 300px; display: grid; grid-template-rows: 128px 1fr; gap: 22px; padding: 18px 20px 24px; border: 1px solid #d5c7b2; border-top: 1px solid #b5aa97; background: rgba(255,251,243,.63); box-shadow: 7px 9px 0 rgba(99,75,43,.1); overflow: hidden; transform: rotate(var(--route-tilt, 0deg)); transition: transform .3s ease, box-shadow .3s ease, background .3s ease; }
 .paper-landing .paper-route:nth-child(1) { --route-tilt: -1.2deg; }

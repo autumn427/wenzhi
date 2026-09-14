@@ -18,10 +18,10 @@ for(const choice of base.currentEvent.choices){
  assert.deepEqual(next.decisions[0].eventSnapshot,base.currentEvent)
  assert.equal(next.decisions.length,1)
  assert.equal(next.currentEvent.day,90)
- assert.ok(next.currentEvent.story.includes('30分钟'))
+ assert.ok(next.currentEvent.story.includes(choice.id === 'a-take-shift' ? '提前交了两页作业' : '拒绝了补班'))
  assert.ok(next.currentEvent.story.includes('第90天'))
  assert.deepEqual(next.decisions[0].delta,choice.delta)
- assert.ok(Object.values(choice.delta).every(n=>n===0),'recording a simulated action must not guarantee skill gain')
+ assert.ok(['technicalSkill','aiCollaboration','domainDepth'].every(key=>(choice.delta[key]??0)===0),'a shift decision must not invent technical or AI skill gain')
 }
 assert.equal(JSON.stringify(base),original,'preview must not mutate the original timeline')
 assert.notEqual(record.results[0].run.currentEvent.story,record.results[1].run.currentEvent.story)

@@ -1,8 +1,10 @@
 import type { SimulationProfile, UniverseRun } from './simulation'
+import { campusRouteExperiment } from './campus-experiment.ts'
 
 /** A small, explicitly local plan. It uses only a completed route's records. */
 export function firstRouteExperiment(run: UniverseRun, profile: SimulationProfile) {
   if (run.currentEvent.day !== 180 || !run.decisions.length) return null
+  if (!run.route && run.currentEvent.id.startsWith('campus-') && !run.currentEvent.generatedFrom) return campusRouteExperiment(run)
   const last = run.decisions[run.decisions.length - 1]
   const tradeoff = (last.actionOutcome?.tradeoff || last.tradeoff || '投入时间，结果仍待验证').replace(/[。.!！]+$/, '')
   return {

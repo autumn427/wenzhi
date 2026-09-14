@@ -1,7 +1,7 @@
 import type { SimulationProfile, UniverseRun } from './simulation'
 import { compareEcho, type EchoContext } from './echo-context'
 
-export type ForkSource = { id: string; title: string; excerpt: string; sourceUrl: string; author: string; relevanceScore?: number }
+export type ForkSource = { id: string; title: string; excerpt: string; sourceUrl: string; author: string; avatarUrl?: string; votes?: number; relevanceScore?: number }
 export type ForkResult = { choiceId: string; action: string; run: UniverseRun; cost: string; remaining: string; sourceIds: string[] }
 export type ForkRecord = { version: 1; identity: string; source: ForkSource | null; results: ForkResult[] }
 

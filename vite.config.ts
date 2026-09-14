@@ -21,6 +21,9 @@ export default defineConfig({
     },
   },
   server: {
+    proxy: {
+      '/api': 'http://127.0.0.1:8787',
+    },
     fs: {
       // Keep Vite's default deny patterns and block Wrangler secret files too.
       deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/.dev.vars', '**/.dev.vars.*'],

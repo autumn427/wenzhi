@@ -1,3 +1,4 @@
+import { ThumbsUp } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { chooseUniverseFreeAction, chooseUniversePath, isGeneratedActionSource, type GeneratedFreeAction, type SimulationProfile, type UniverseRun } from './simulation'
 import { acceptsNextAction, normalizedAction } from './action-submission'
@@ -91,41 +92,42 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
     }
   }
   return <section ref={root} className="fork-workshop" aria-label="同一处境，试两种做法">
-    <header className="fork-intro"><div><span className="fork-eyebrow">第 {run.currentEvent.day} 天 · 一个关键分岔</span>
-      <h2>{run.currentEvent.title}</h2><p>{run.currentEvent.story}</p><strong>{run.currentEvent.tension}</strong></div>
-      <img src="/wayfinding/paper-wayfinding-landscape.webp" alt="" /></header>
-    <div className="fork-ground"><span>同一个出发点</span><p>两次试选共用当前处境、此前选择、每周 {run.state.weeklyHours} 小时预算和同一份参照。仅预演下一幕，确认后才推进路线。</p></div>
-    <aside className="fork-source" aria-label="这一份知乎参照">
-      <span className="fork-eyebrow">选择前，看看一个现实线索</span>
-      {source && comparison ? <><p>{comparison.summary}</p><details><summary>展开摘录 · {source.author || '作者未提供'}</summary>
-        <h3>{source.title}</h3>{comparison.matches.slice(0, 1).map(match => <blockquote key={match.label}>{match.quote}</blockquote>)}
-        <p>{source.excerpt}</p><small>检索摘录，可能不完整；共同关键词不代表处境相同，也不证明模拟结局。</small>
-        <a href={source.sourceUrl} target="_blank" rel="noreferrer">阅读知乎原文 ↗</a></details></>
-        : <p>{record ? '这次试选未使用知乎参照，后果仅按场景推演。' : sourceLoading ? '正在寻找相关摘录，也可以直接试选。' : sourceError ? '来源检索暂不可用，可以直接试选。' : '暂未找到有明确共同线索的摘录，先留白。'}</p>}
-      {!record && !sourceLoading && !source && <button type="button" onClick={onRetrySource}>重新查找参照</button>}
-      {record && <small>参照已固定，两种做法使用同一份资料。</small>}
-    </aside>
+    <div className="fork-main">
+    <header className="fork-intro"><div><span className="fork-eyebrow">第 {run.currentEvent.day} 天</span>
+      <h2>{run.currentEvent.title}</h2><p>{run.currentEvent.story}</p><strong>{run.currentEvent.tension}</strong></div></header>
     <div className="fork-choices">{choices.map((choice, index) => {
       const tried = results.some(result => result.choiceId === choice.id)
       return <button type="button" key={choice.id} disabled={Boolean(busy) || tried} onClick={() => void tryChoice(choice.id)}>
-        <span className="fork-eyebrow">做法 {index + 1} · {tried ? '已保留结果' : results.length ? '换一种做法试试' : '先试这一种'}</span>
+        <span className="fork-eyebrow">选择 {index + 1}{tried ? ' · 已试过' : ''}</span>
         <strong>{choice.label}</strong><span>{choice.tradeoff}</span><b aria-hidden="true">{tried ? '✓' : '→'}</b></button>
     })}</div>
-    {busy && <p role="status">正在预演这次行动；原路线停在出发点，暂未推进…</p>}
+    <div className="fork-choice-footer"><span>先看后果，再决定是否继续。</span><button className="fork-custom" type="button" disabled={Boolean(busy)} onClick={onCustom}>我有别的做法 →</button></div>
+
+    {busy && <p role="status">正在展开下一幕…</p>}
     {error && <p className="fork-error" role="alert">{error}</p>}
     {results.length > 0 && <div className="fork-results" ref={resultsRef} tabIndex={-1}>
-      <h3>{results.length === 2 ? '同一处境，两份模拟记录' : '第一份模拟记录已保留'}</h3>
-      <p>这一轮只记录行动与取舍，不计能力加分。</p>
-      <p>{results.length === 1 ? '可以回到同一处境试另一种做法，也可以沿这条路继续。' : '只比较这次行动留下的线索，不据此判断哪条人生更好。'}</p>
+      <h3>{results.length === 2 ? '两种选择，两个后续' : '如果这样选…'}</h3>
       <div className="fork-result-grid">{results.map(result => <article key={result.choiceId}>
         <span className="fork-eyebrow">做法 {choices.findIndex(c => c.id === result.choiceId) + 1} · {run.route ? 'AI 模拟' : '预设模拟'}</span>
         <h4>{result.action}</h4><dl><dt>留下了什么 · 模拟记录</dt><dd>{result.run.currentEvent.story}</dd>
           <dt>付出了什么</dt><dd>{result.cost}</dd><dt>仍待弄清</dt><dd>{result.remaining}</dd></dl>
-        <small>{result.sourceIds.length ? '本幕引用了上方摘录作为参照。' : '本幕没有引用知乎内容作为后果依据。'}</small>
+        <small>{result.sourceIds.length ? '本幕引用了知乎摘录作为参照。' : '本幕没有引用知乎内容作为后果依据。'}</small>
         <button type="button" disabled={Boolean(busy)} onClick={() => onCommit(structuredClone(result.run))}>沿做法 {choices.findIndex(c => c.id === result.choiceId) + 1} 继续 →</button>
       </article>)}</div>
       <p className="fork-footnote">{demo ? '试玩记录仅在本次页面内保留。' : saved ? '已保存到当前浏览器，刷新可回看。' : '浏览器未能保存，关闭页面后试选记录可能丢失。'} {run.route ? 'AI 输出仍可能存在生成差异；固定条件不等于真实因果实验。' : '预设后果固定，不因重新打开而改变。'}</p>
     </div>}
-    <button className="fork-custom" type="button" disabled={Boolean(busy)} onClick={onCustom}>我有别的做法，返回自由选择</button>
+    </div>
+    <aside className="fork-source" aria-label="知乎现实参照">
+      <div className="fork-source-brand"><img src="/zhihu-logo.svg" alt="知乎" /><span>现实参照</span></div>
+      {source && comparison ? <>
+        <div className="fork-source-author">
+          {source.avatarUrl && /^https:\/\/[^/]+\.zhimg\.com\//.test(source.avatarUrl) ? <img src={source.avatarUrl} alt={`${source.author}的头像`} referrerPolicy="no-referrer" onError={event => { event.currentTarget.style.display = 'none' }} /> : null}
+          <span>{source.author || '作者未提供'}</span>
+        </div>
+        <a className="fork-source-title" href={source.sourceUrl} target="_blank" rel="noreferrer">{source.title.replace(/\s*[-–]\s*知乎$/, '')}<span aria-hidden="true"> ↗</span></a>
+        <p className="fork-source-excerpt">{source.excerpt}</p>
+        <div className="fork-source-stats"><span><ThumbsUp size={16} aria-hidden="true" />{typeof source.votes === 'number' && Number.isFinite(source.votes) ? `${source.votes.toLocaleString('zh-CN')} 赞同` : '赞同数未提供'}</span><a href={source.sourceUrl} target="_blank" rel="noreferrer">查看原文 ↗</a></div>
+      </> : <div className="fork-source-empty"><p>{sourceLoading ? '正在寻找相关经历…' : '暂时没有合适的参照，不影响选择。'}</p>{!record && !sourceLoading && <button type="button" onClick={onRetrySource}>重新查找</button>}</div>}
+    </aside>
   </section>
 }

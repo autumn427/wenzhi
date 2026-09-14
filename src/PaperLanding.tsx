@@ -69,25 +69,32 @@ export function PaperLanding({ onStart, onDemo }: Props) {
       <button className="paper-scroll" onClick={explore}>向下，看看三条路 <ArrowDown size={20} /></button>
     </section>
     <section className="paper-paths" id="paper-paths" aria-labelledby="paper-paths-title">
-      <span className="paper-eyebrow">人生选择 · 180 天互动游戏</span>
-      <h2 id="paper-paths-title">想换条路，又怕后悔。<br />那就先在这里试一次。</h2>
+      <header className="paper-paths-intro">
+        <div className="paper-paths-heading">
+          <h2 id="paper-paths-title">想换条路，又怕后悔。<br />那就先在这里试一次。</h2>
+        </div>
+        <div className="paper-demo-context" aria-labelledby="paper-demo-title">
+          <h3 id="paper-demo-title">“这个学期，每周空出来的两三个晚上，怎么用？”</h3>
+          <p>课表终于没那么满了。你想多一点生活费，也担心以后找工作没什么可写，但又不想把大学过成每天赶任务。室友已经各自开始行动，<span className="paper-demo-ending">你也想试着改变一点。</span></p>
+        </div>
+      </header>
       <div className="paper-route-list">
         {[
-          ['A', '系统学习', '我想自己弄懂。慢一点，也认了。', 'blue', 'fold'],
-          ['B', 'AI 协作', '我想先做出来。出了问题，再学着收拾。', 'amber', 'spark'],
-          ['C', '专业深耕', '我还舍不得放下本专业，想再认真做一回。', 'green', 'leaf'],
+          ['A', '去店里兼职', '先挣一点生活费，看看自己能不能兼顾。', 'blue', 'fold'],
+          ['B', '投第一份实习', '先投一次简历，看看真正的上班是什么样。', 'amber', 'spark'],
+          ['C', '和朋友摆市集', '一起摆个小摊，钱和分工都得说清。', 'green', 'leaf'],
         ].map(([code, title, text, tone, shape]) => <article className={`paper-route ${tone}`} key={code}>
           <div className="paper-route-door" aria-hidden="true">
             <img loading="lazy" decoding="async" src={`/career-universe-${code.toLowerCase()}-full.webp`} alt="" />
             <span className="paper-route-cut cut-back" />
             <span className="paper-route-cut cut-front" />
             <span className={`paper-route-icon icon-${shape}`}><i /><i /><i /></span>
-            <span className="paper-route-scene-label">{code === 'A' ? '基础 · 留下根' : code === 'B' ? '协作 · 先试做' : '专业 · 看得深'}</span>
+            <span className="paper-route-scene-label">{code === 'A' ? '兼职 · 生活费' : code === 'B' ? '实习 · 探探路' : '市集 · 一起做'}</span>
           </div>
           <div className="paper-route-copy"><span className="paper-route-index">{code}</span><h3>{title}</h3><p>{text}</p></div>
         </article>)}
       </div>
-      <div className="paper-paths-footer"><p>每条路都有舍不得的东西。看看半年后，你还认不认这笔账。<br />玩完以后，挑一件小事，回到生活里试七天。</p><button className="paper-primary" onClick={onStart}>试试我的选择 <ArrowRight size={24} /></button></div>
+      <div className="paper-paths-footer"><p>每条路都有舍不得的东西。看看半年后，你还认不认这笔账。<br />玩完以后，挑一件小事，回到生活里试七天。</p><button className="paper-primary" onClick={onDemo}>试试我的选择 <ArrowRight size={24} /></button></div>
     </section>
   </div>
 }

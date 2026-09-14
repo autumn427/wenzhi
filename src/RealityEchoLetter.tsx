@@ -5,7 +5,7 @@ import './RealityEchoLetter.css'
 
 type Letter = { id: string; title: string; excerpt: string; sourceUrl: string; author: string; relevanceScore?: number }
 
-export function RealityEchoLetter({ context, onClose, onAdjust }: { context: EchoContext; onClose: () => void; onAdjust?: () => void }) {
+export function RealityEchoLetter({ context, onClose, onAdjust, savedLetters }: { context: EchoContext; onClose: () => void; onAdjust?: () => void; savedLetters?: Letter[] }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const [letters, setLetters] = useState<Letter[]>([])
   const [index, setIndex] = useState(0)
@@ -18,6 +18,7 @@ export function RealityEchoLetter({ context, onClose, onAdjust }: { context: Ech
     return () => { dialog.current?.close(); previous?.focus({ preventScroll: true }) }
   }, [])
   useEffect(() => {
+    if (savedLetters) { setLetters(savedLetters); setIndex(0); setLoading(false); setError(''); return }
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 20000)
     let active = true
@@ -37,13 +38,14 @@ export function RealityEchoLetter({ context, onClose, onAdjust }: { context: Ech
       } finally { clearTimeout(timeout); if (active) setLoading(false) }
     })()
     return () => { active = false; clearTimeout(timeout); controller.abort() }
-  }, [context, attempt])
+  }, [context, attempt, savedLetters])
   const letter = letters[index]
   const comparison = letter ? compareEcho(context, letter) : null
   return createPortal(<dialog className="wz-choice-letter" ref={dialog} aria-labelledby="wz-choice-letter-title" onCancel={onClose}>
     <header><span>现实回声 · 宇宙 {context.code} · 第 {context.day} 天</span><button type="button" aria-label="关闭来信" onClick={onClose}>×</button></header>
     <div className="wz-choice-letter-body">
       <h2 id="wz-choice-letter-title">从别人的经历，看看自己的选择。</h2>
+      {savedLetters && <p>知乎 API 摘录 · 2026-09-14 检索保存 · 故事为虚构试玩</p>}
       <section className="wz-choice-letter-context"><small>你的模拟路线 · {context.route}</small>{context.action && <p>上一次选择{context.actionDay !== undefined ? ` · 第 ${context.actionDay} 天` : ''}：{context.action}</p>}<p>眼前这一幕：{context.eventTitle}</p><span>{context.obstacle}</span></section>
       <div aria-live="polite">
         {loading && <p className="wz-choice-letter-status">正在寻找与这次选择相关的公开经历…</p>}

@@ -1,3 +1,4 @@
+import { campusOpening } from './campus-demo'
 import type { CSSProperties, ReactNode } from 'react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { ArrowDown, ArrowRight, Check } from '@phosphor-icons/react'
@@ -7,9 +8,9 @@ import type { UniverseCode } from './simulation'
 import './story-journey.css'
 
 const worlds = [
-  { code: 'A' as const, title: '系统学习', note: '走进蓝色书塔', tone: '#315f80' },
-  { code: 'B' as const, title: 'AI 协作', note: '走进金色工坊', tone: '#aa762d' },
-  { code: 'C' as const, title: '专业深耕', note: '走进绿色苗圃', tone: '#486c52' },
+  { code: 'A' as const, title: '去店里兼职', note: '校门口的兼职小店', tone: '#315f80' },
+  { code: 'B' as const, title: '投第一份实习', note: '第一份实习', tone: '#aa762d' },
+  { code: 'C' as const, title: '和朋友摆市集', note: '和朋友一起的校园市集', tone: '#486c52' },
 ]
 
 /** A small Liu Kanshan paper figure that walks between timeline stations. */
@@ -85,7 +86,7 @@ const stageArtwork: Record<UniverseCode, Partial<Record<30 | 90 | 150, string>>>
   B: { 30: '/career-universe-b-full.webp', 90: '/career-scene-b-90-coherent-q78.webp', 150: '/career-scene-b-150-coherent-q78.webp' },
   C: { 30: '/career-universe-c-full.webp', 90: '/career-scene-c-90-coherent-q78.webp', 150: '/career-scene-c-150-coherent-q78.webp' },
 }
-export function UniverseDoors({ onEnter, complete, routes }: { routes?: {code: UniverseCode; title: string; choice: string; fit?: string}[]; onEnter: (index: number) => void; complete: UniverseCode[] }) {
+export function UniverseDoors({ onEnter, complete, routes, opening }: { opening?: typeof campusOpening; routes?: {code: UniverseCode; title: string; choice: string; fit?: string}[]; onEnter: (index: number) => void; complete: UniverseCode[] }) {
   const root = useRef<HTMLElement>(null)
   const [entering, setEntering] = useState<number | null>(null)
   useGSAP(() => {
@@ -100,8 +101,8 @@ export function UniverseDoors({ onEnter, complete, routes }: { routes?: {code: U
     timeline.to(buttons[entering].querySelector('img'), { scale: 1.25, duration: .65, ease: 'power2.inOut' }, 0)
   }, { scope: root, dependencies: [entering], revertOnUpdate: true })
   return <section ref={root} className="universe-doors" aria-label="选择一条路进入故事">
-    <h2>这一次，走哪条路？</h2>
-    <p className="universe-doors-lede">先选一条愿意试走的路，接下来会看到 180 天后的取舍。</p>
+    <h2>{opening?.title ?? '这一次，走哪条路？'}</h2>
+    <p className="universe-doors-lede">{opening ? <>{opening.story}<br />{opening.tension}<br /><strong>{opening.question}</strong></> : '先选一条愿意试走的路，接下来会看到 180 天后的取舍。'}</p>
     <div className="universe-door-grid">{worlds.map((base, index) => { const route=routes?.find(r=>r.code===base.code); const world={...base,title:route?.title??base.title}; return <button key={world.code} disabled={entering !== null} onClick={() => setEntering(index)} style={{ '--door-tone': world.tone } as React.CSSProperties}>
       <img src={`/career-universe-${world.code.toLowerCase()}-full.webp`} alt={world.note} />
       <span className="universe-door-caption"><small>宇宙 {world.code}{complete.includes(world.code) ? ' · 已抵达' : ''}</small><strong>{world.title}</strong>{route && <small className="door-premise">{route.choice}</small>}{route?.fit && <small className="door-fit">适合：{route.fit}</small>}<span>{complete.includes(world.code) ? <Check size={20}/> : <ArrowRight size={20}/>}</span></span>

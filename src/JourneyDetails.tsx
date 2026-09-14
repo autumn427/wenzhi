@@ -9,12 +9,23 @@ type PaperIconKind = 'route' | 'radar' | 'insight' | 'metric'
 function PaperIcon({ kind }: { kind: PaperIconKind }) {
  return <span className={`paper-icon paper-icon-${kind}`} aria-hidden="true"><i/><i/><i/></span>
 }
-export function StateRadar({run, baseline = 'previous'}:{run:UniverseRun; baseline?: 'previous' | 'initial'}) {
+export function StateRadar(props:{run:UniverseRun; baseline?: 'previous' | 'initial'}) {
+ const {run} = props
+ if (!run.route && run.currentEvent.id.startsWith('campus-')) return <section className="campus-time-notes" aria-label="课余时间与取舍">
+  <h4>这条路的时间账</h4>
+  <p>每周最多留出 {run.state.weeklyHours} 小时 · 课程和小组作业优先</p>
+  <p>{run.decisions.length ? `已做 ${run.decisions.length} 次选择。最近一次：${run.decisions[run.decisions.length - 1].tradeoff}` : '先看看排班、出勤或备摊需要多少时间，再决定能接多少。'}</p>
+  <small>这是虚构试玩；工资、工作机会和朋友的反应都需要在现实中重新确认。</small>
+ </section>
+ return <SkillRadar {...props}/>
+}
+
+function SkillRadar({run, baseline = 'previous'}:{run:UniverseRun; baseline?: 'previous' | 'initial'}) {
  const canvas=useRef<HTMLCanvasElement>(null)
  const previous=run.decisions[baseline === 'initial' ? 0 : run.decisions.length-1]?.stateBefore
  const radarPalette = { A: { ink: '#287dcc', fillTop: 'rgba(40,125,204,.30)', fillBottom: 'rgba(40,125,204,.10)', label: '蓝色' }, B: { ink: '#c88725', fillTop: 'rgba(200,135,37,.30)', fillBottom: 'rgba(200,135,37,.10)', label: '橙色' }, C: { ink: '#4f8968', fillTop: 'rgba(79,137,104,.30)', fillBottom: 'rgba(79,137,104,.10)', label: '绿色' } } as const
  const routePalette = radarPalette[run.code]
- const routeTitle = run.route?.title ?? ({ A: '系统学习', B: 'AI 协作', C: '专业深耕' } as const)[run.code]
+ const routeTitle = run.route?.title ?? ({ A: '去店里兼职', B: '投第一份实习', C: '和朋友摆市集' } as const)[run.code]
  const timelineSnapshots: Array<{key:string;label:string;state:SimulationState}> = baseline === 'initial'
   ? [
     ...(run.decisions[0]?.stateBefore ? [{key:'day-30',label:'30天',state:run.decisions[0].stateBefore}] : []),
@@ -89,6 +100,17 @@ const drawCardRadar = (ctx: CanvasRenderingContext2D, run: UniverseRun, baseline
 }
 const resultCardBlob = (run: UniverseRun, endingMetrics: Array<{label:string;gain:number|null}>): Promise<Blob|null> => new Promise(resolve => {
  const canvas = document.createElement('canvas'); canvas.width=1200; canvas.height=1500; const ctx=canvas.getContext('2d'); if(!ctx){resolve(null);return}
+ if (!run.route && run.currentEvent.id.startsWith('campus-')) {
+  ctx.fillStyle='#faf5eb';ctx.fillRect(0,0,1200,1500);ctx.textAlign='left';ctx.textBaseline='alphabetic'
+  ctx.fillStyle=routeCardColors[run.code].ink;ctx.font='600 34px serif';ctx.fillText(`问枝 · 校园试玩 · 宇宙 ${run.code}`,80,100)
+  let y=185
+  const paragraph=(text:string,font:string,lineHeight:number)=>{ctx.font=font;for(const line of cardLines(ctx,text,1040)){ctx.fillText(line,80,y);y+=lineHeight}y+=24}
+  paragraph(run.currentEvent.title,'600 44px serif',60)
+  ctx.fillStyle='#514638';paragraph(run.currentEvent.story,'28px serif',44)
+  run.decisions.forEach(d=>paragraph(`第${d.day}天：${d.choiceLabel}。${d.tradeoff ?? ''}`,'25px serif',38))
+  ctx.fillStyle='#756954';ctx.font='22px serif';ctx.fillText('虚构试玩 · 从选择里留下一件小事，回到现实试七天',80,1450)
+  canvas.toBlob(resolve,'image/png');return
+ }
  const colors=routeCardColors[run.code]; ctx.fillStyle='#faf5eb';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle=colors.ink;ctx.fillRect(0,0,canvas.width,22)
  ctx.fillStyle='#756954';ctx.font='500 28px "Noto Serif SC", serif';ctx.fillText(`问枝 · 宇宙 ${run.code}`,80,100);ctx.fillStyle='#2b2925';ctx.font='600 58px "Noto Serif SC", serif';ctx.fillText('走过这半年',80,180)
  ctx.fillStyle=colors.soft;ctx.fillRect(80,220,1040,76);ctx.fillStyle=colors.ink;ctx.font='600 30px "Noto Serif SC", serif';ctx.fillText(run.currentEvent.title,108,270)
@@ -101,17 +123,18 @@ const resultCardBlob = (run: UniverseRun, endingMetrics: Array<{label:string;gai
 export function JourneyEnding({run,onContinue,continueLabel,onReplay}:{run:UniverseRun;onContinue:()=>void;continueLabel:string;onReplay?:()=>void}) {
  const [shareState,setShareState]=useState<'idle'|'copied'|'shared'|'downloaded'>('idle')
  useEffect(()=>{document.querySelector('.wz-view.wz-universes')?.scrollTo({top:0,behavior:'instant'})},[run.code])
+ const campus = !run.route && run.currentEvent.id.startsWith('campus-')
  const first=run.decisions[0]?.stateBefore
  const ranking=axes.filter(([key])=>key!=='energy').map(([key,label])=>({key,label,gain:first?run.state[key]-first[key]:0})).sort((a,b)=>b.gain-a.gain)
  const growth=ranking[0]
  const keyDecision=[...run.decisions].sort((a,b)=>(b.delta[growth.key]??0)-(a.delta[growth.key]??0))[0]
  const outward=run.decisions.filter(d=>(d.delta.portfolio??0)>0 || (d.delta.opportunity??0)>0)
  const cost=[...run.decisions].sort((a,b)=>(a.delta.energy??0)-(b.delta.energy??0))[0]
- const endingMetrics=axes.map(([key,label])=>({key,label,gain:first ? run.state[key]-first[key] : null}))
+ const endingMetrics=(campus ? [] : axes).map(([key,label])=>({key,label,gain:first ? run.state[key]-first[key] : null}))
  const downloadCard=async()=>{const blob=await resultCardBlob(run,endingMetrics);if(!blob)return;const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`wenzhi-${run.code}-180-days.png`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setShareState('downloaded')}
  const shareResult=async()=>{
   const changes=endingMetrics.filter(({gain})=>gain!==null).map(({label,gain})=>`${label} ${gain! > 0 ? '+' : ''}${gain}`).join(' · ')
-  const text=[`问枝 · 宇宙 ${run.code} · ${run.currentEvent.title}`,`180天后：${run.currentEvent.story}`,`这条路的变化：${changes || '暂无起始记录'}`,`这是一段规则驱动的互动模拟，不是现实预测。`].join('\n')
+  const text=[`问枝 · 宇宙 ${run.code} · ${run.currentEvent.title}`,`180天后：${run.currentEvent.story}`,campus ? `你的选择：${run.decisions.map(d=>d.choiceLabel).join(' → ')}` : `这条路的变化：${changes || '暂无起始记录'}`,`这是一段规则驱动的互动模拟，不是现实预测。`].join('\n')
   const shareApi=navigator as Navigator & { share?: (data:{title?:string;text?:string;files?:File[]})=>Promise<void>; canShare?: (data:{files?:File[]})=>boolean }
   try {
    const blob=await resultCardBlob(run,endingMetrics); const file=blob ? new File([blob],`wenzhi-${run.code}-180-days.png`,{type:'image/png'}) : null
@@ -120,14 +143,14 @@ export function JourneyEnding({run,onContinue,continueLabel,onReplay}:{run:Unive
    await navigator.clipboard.writeText(text); setShareState('copied')
   } catch { setShareState('idle') }
  }
- const observations=[
+ const observations=campus ? run.decisions.map((decision,index)=>({title: ['你最先回复了什么', '后来怎样调整', '最后留下的取舍'][index], body: `你选择“${decision.choiceLabel}”。${decision.tradeoff ?? ''}`})) : [
   {title:'你把投入放在了哪里',body:first && growth.gain>0 ? `这条路线里，${growth.label}的变化最明显。“${keyDecision?.choiceLabel}”是其中一次具体投入。` : '这条路线没有显示出明确的能力增长。行动留下的线索，比急着给自己下结论更有用。'},
   {title:'你怎样让事情往前走',body:outward.length ? `有 ${outward.length} 次选择把精力用在作品或外部机会。“${outward[outward.length-1].choiceLabel}”让这条路从想法走向了具体行动。` : `“${run.decisions[run.decisions.length-1]?.choiceLabel ?? '继续探索'}”保留了你的方向。这段经历里，外部反馈仍然有限。`},
   {title:'你为这条路付出了什么',body:!first ? '这条旧记录没有起始快照，无法判断精力的整体变化。可以回看已保存的行动与代价。' : run.state.energy<first.energy ? `精力比出发时更少了。“${cost?.choiceLabel}”也占用了你的余力；这些投入能否长期维持，值得带回现实再试一试。` : '到结束时，你仍保留了起始的精力水平。这条路上的取舍，没有表现为持续透支；其他代价仍要结合现实判断。'},
  ]
  return <section className="journey-ending ending-paper-desk" tabIndex={-1} aria-label="这条路线的故事结尾">
   <header className="ending-desk-header"><PaperAccent kind="return-envelope" placement="ending" /><div className="ending-desk-meta"><span className="ending-desk-stamp">RETURN / 180</span><span>宇宙 {run.code} · 第 180 天</span></div><h2>{run.currentEvent.title}</h2><p>{run.currentEvent.story}</p><aside className="ending-envelope-note" aria-label="返程信笺"><span>返程信笺</span><strong>把这段旅程带回现实</strong><p>留下一件小事，试 7 天再回来。</p><b>已封存</b></aside></header>
-  <div className="ending-desk-board"><div className="ending-desk-line" aria-hidden="true"/><div className="ending-desk-index ending-desk-index-reflection" aria-hidden="true"><b>01</b><span>回望选择</span></div><div className="ending-desk-index ending-desk-index-radar" aria-hidden="true"><b>02</b><span>读取变化</span></div><div className="ending-reflection"><div><div className="paper-section-heading"><PaperIcon kind="insight"/><h3>从你的选择里，看到了这些</h3></div><ol>{observations.map((o,index)=><li key={o.title}><PaperIcon kind={index === 1 ? 'route' : index === 2 ? 'metric' : 'insight'}/><div><h4>{o.title}</h4><p>{o.body}</p></div></li>)}</ol></div><div className={`ending-radar-column route-tone-${run.code.toLowerCase()}`}><StateRadar run={run} baseline="initial"/><div className="ending-metrics" aria-label="这条路线的半年变化">{endingMetrics.map(({key,label,gain})=><div className={gain === null ? '' : gain > 0 ? 'up' : gain < 0 ? 'down' : 'flat'} key={key}><PaperIcon kind="metric"/><span><small>{label}</small><strong>{gain === null ? '—' : `${gain > 0 ? '+' : ''}${gain}`}</strong></span></div>)}</div><p className="ending-metrics-note">数值只用于回看这次模拟，不代表现实能力测评。</p></div></div></div>
+  <div className="ending-desk-board"><div className="ending-desk-line" aria-hidden="true"/><div className="ending-desk-index ending-desk-index-reflection" aria-hidden="true"><b>01</b><span>回望选择</span></div><div className="ending-desk-index ending-desk-index-radar" aria-hidden="true"><b>02</b><span>读取变化</span></div><div className="ending-reflection"><div><div className="paper-section-heading"><PaperIcon kind="insight"/><h3>从你的选择里，看到了这些</h3></div><ol>{observations.map((o,index)=><li key={o.title}><PaperIcon kind={index === 1 ? 'route' : index === 2 ? 'metric' : 'insight'}/><div><h4>{o.title}</h4><p>{o.body}</p></div></li>)}</ol></div><div className={`ending-radar-column route-tone-${run.code.toLowerCase()}`}><StateRadar run={run} baseline="initial"/>{!campus && <><div className="ending-metrics" aria-label="这条路线的半年变化">{endingMetrics.map(({key,label,gain})=><div className={gain === null ? '' : gain > 0 ? 'up' : gain < 0 ? 'down' : 'flat'} key={key}><PaperIcon kind="metric"/><span><small>{label}</small><strong>{gain === null ? '—' : `${gain > 0 ? '+' : ''}${gain}`}</strong></span></div>)}</div><p className="ending-metrics-note">数值只用于回看这次模拟，不代表现实能力测评。</p></>}</div></div></div>
   <footer className="ending-desk-footer"><small>{continueLabel.includes('实验') ? '把一件小事带回现实，试 7 天再回来。' : '再走一条路，比较不同取舍。'}</small><div className="journey-ending-actions">{onReplay && <button className="ending-share ending-replay" type="button" onClick={onReplay}>重新走一遍</button>}<button className="ending-share" type="button" onClick={() => void shareResult()}>{shareState === 'shared' ? '已打开分享' : shareState === 'copied' ? '结果已复制' : shareState === 'downloaded' ? '结果卡已下载' : '分享结果卡'}</button><button className="ending-share ending-card-download" type="button" onClick={() => void downloadCard()}>下载 PNG</button><button className="paper-primary" onClick={onContinue}>{continueLabel}</button></div></footer>
  </section>
 }

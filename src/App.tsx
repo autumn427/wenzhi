@@ -1,3 +1,6 @@
+import { campusOpening, campusProfile, campusUniverses } from './campus-demo'
+import { campusComparisonExperiment } from './campus-experiment'
+import { campusEvidence, campusSources } from './campus-evidence'
 import { normalizedAction, acceptsNextAction } from './action-submission'
 import { actionDraftKey, clearActionDraft, lastProfileKey, readActionDraft, readLastProfile, saveLocal } from './journey-recovery'
 import { firstRouteExperiment } from './first-experiment'
@@ -131,7 +134,7 @@ type RealityExperiment = {
   title: string
   hypothesis: string
   reason: string
-  dailyTasks: Array<{ day: number; task: string; minutes: number }>
+  dailyTasks: Array<{ day: number; task: string; minutes: number; title?: string }>
   successSignal: string
   stopRule: string
   feedbackQuestion: string
@@ -324,16 +327,7 @@ const defaultSituation: Situation = {
 // through the worker's structured-output and narrative-boundary checks.
 const LIVE_AI_ENABLED = true
 
-const judgeDemoSituation: Situation = {
-  identity: 'student',
-  intent: 'efficiency',
-  time: 'low',
-  sacrifice: 'study',
-  confusion: '我是人文学科研究生，每周只能拿出 2 小时：现在还有必要学编程吗？',
-  skills: '写作、访谈、文献分析、基础表格整理',
-  goal: '做出一个能减少文献整理时间、可以真正交给同学使用的小工具',
-  worries: '挤占论文时间；学了半年仍做不出作品；过度依赖 AI 后失去判断力',
-}
+const judgeDemoSituation: Situation = campusProfile
 
 function createJudgeDemoRuns(profile: Situation): Record<UniverseCode, UniverseRun> {
   return createUniverseRuns(profile)
@@ -355,7 +349,9 @@ const featuredVoices = featuredVoiceAuthors
   .filter((item): item is Evidence => Boolean(item))
 
 const programmingEvidence = flattenBranches(questions[0].branches).flatMap((branch) => branch.evidence)
-const programmingEvidenceById = new Map(programmingEvidence.flatMap((item) => item.id ? [[item.id, item] as const] : []))
+const programmingEvidenceById = new Map([...programmingEvidence, ...campusEvidence].flatMap((item) => item.id ? [[item.id, item] as const] : []))
+
+function activeRunEvidenceVoice(code: UniverseCode) { return campusEvidence.find(item => item.id === ({ A: 'campus-a1', B: 'campus-b1', C: 'campus-c1' }[code])) }
 
 function readUniverseRuns(situation: Situation) {
   try {
@@ -502,15 +498,9 @@ function readLiveEvidence(situation: Situation, eventId: string): LiveEvidenceRe
 }
 
 const eventSearchThemes: Record<string, string> = {
-  'A-30': '系统学习 编程入门 项目失败 坚持 转向 亲身经历',
-  'A-90': '学习编程 实习机会 专业学习 时间冲突 亲身经历',
-  'A-180': '跨专业 技术能力 半年学习 复盘 亲身经历',
-  'B-30': 'AI协作 原型失败 调试 基础能力 亲身经历',
-  'B-90': 'AI工具 工作流 项目机会 时间取舍 亲身经历',
-  'B-180': 'AI协作 做产品 能力边界 复盘 亲身经历',
-  'C-30': '深耕专业 同伴转行 焦虑 坚持 亲身经历',
-  'C-90': '专业能力 数字工具 项目机会 时间取舍 亲身经历',
-  'C-180': '原专业 长期积累 职业选择 复盘 亲身经历',
+  'A-30': '大学生 兼职 排班 小组作业', 'A-90': '大学生 兼职 生活费 时间 精力', 'A-150': '大学生 兼职 考试周 减班', 'A-180': '大学生 兼职 学业 取舍 经历',
+  'B-30': '大学生 第一份实习 简历 没有经验', 'B-90': '实习 打杂 带教 沟通', 'B-150': '实习 续期 课业 冲突', 'B-180': '第一份实习 收获 复盘',
+  'C-30': '大学生 校园市集 朋友 分工', 'C-90': '大学生 摆摊 成本 库存', 'C-150': '朋友 合伙 摆摊 分账', 'C-180': '大学生 摆摊 经历 亏本',
 }
 
 const calibrationMetricLabels: Record<string, string> = {
@@ -527,47 +517,7 @@ function buildLiveEvidenceQuery(situation: Situation, eventId: string) {
   return `${buildProfileSearchContext(situation)} ${eventSearchThemes[eventId] ?? '职业选择 真实经历'}`.slice(0, 120)
 }
 
-const demoCareerUniverses = [
-  {
-    code: 'A',
-    tone: 'blue',
-    title: '系统学习',
-    choice: '从基础学起，先弄懂自己写的代码',
-    fit: '愿意先弄懂基础，接受慢一点成形',
-    preview: '做出一个能运行的小产品，也学会自己排错。',
-    future: '半年后，你可能终于能独立修好一个报错。只是做出第一个作品，比想象中慢得多。',
-    tension: '时间就这么多，补基础也意味着少做几件别的事。',
-    milestones: ['补基础与调试', '完成第一个真实项目', '开始建立技术判断力'],
-    action: '按自己的时间预算，先试学一周',
-    sourceIndex: 0,
-  },
-  {
-    code: 'B',
-    tone: 'amber',
-    title: 'AI 协作',
-    choice: '只围绕一个真实任务，边做边学必要代码',
-    fit: '想先做出原型，再补关键能力',
-    preview: '留下一个能工作的 AI 工具，也知道它何时会失手。',
-    future: '半年后，工具可能已经帮上忙。可它一出错，你敢不敢继续用，还是得自己判断。',
-    tension: '做出来很快，修不好时也确实着急。',
-    milestones: ['选定一个重复任务', '和 AI 完成原型', '补齐高频知识缺口'],
-    action: '把本周最重复的任务写下来',
-    sourceIndex: 1,
-  },
-  {
-    code: 'C',
-    tone: 'green',
-    title: '专业深耕',
-    choice: '继续做本专业，弄清哪些活值得借助工具',
-    fit: '想把专业积累继续做成作品',
-    preview: '手里的专业问题更熟了，需要什么工具也更清楚。',
-    future: '半年后，你可能更确信本专业值得做。看到别人靠新工具赶上来，心里也难免发慌。',
-    tension: '专业可以继续做深，技术难题还得找人商量。',
-    milestones: ['找出自己最拿手的问题', '建立工具选择清单', '与技术伙伴协作'],
-    action: '列出三件不必亲自编码的事',
-    sourceIndex: 2,
-  },
-] as const
+const demoCareerUniverses = campusUniverses
 
 const journeyStages = [30, 90, 150, 180] as const
 const journeyStageLabels: Record<(typeof journeyStages)[number], string> = {
@@ -1158,7 +1108,7 @@ function MethodologyDialog({ onClose, pendingCount }: { onClose: () => void; pen
               <div><h3 id="protocol-title">哪些有出处，哪些是游戏编的？</h3><p>越靠近原文，越可以直接核对；越靠近未来，越需要由你验证。</p></div>
             </div>
             <div className="method-trust-layers">
-              <article><b>来源层</b><strong>可以核对</strong><p>原文确实由这位答主发布，作者、摘要和链接被保留。</p></article>
+              <article><b>来源层</b><strong>可以核对</strong><p>知乎 API 返回的作者、短摘录和链接被保留，需回原文核对。</p></article>
               <article><b>转译层</b><strong>可以追踪</strong><p>你能看到哪条现实约束被放进了当前剧情。</p></article>
               <article><b>推演层</b><strong>需要验证</strong><p>未来事件用于比较选择，不代表发生概率或职业结论。</p></article>
             </div>
@@ -1175,9 +1125,9 @@ function MethodologyDialog({ onClose, pendingCount }: { onClose: () => void; pen
               <li><b>看下一步行动</b><span>读完以后，挑一件七天内能试的事。</span></li>
             </ul>
             <div className="method-scope">
-              <span>DATASET V{programmingMethodology.datasetVersion}</span>
+              <span>校园试玩来源 · 6 条</span>
               <b>{pendingCount > 0 ? `${pendingCount} 条新经历待审核` : '公开来源持续更新'}</b>
-              <p>本页仅展示当前体验实际使用的来源。检索日期 {programmingMethodology.retrievedAt}。</p>
+              <p>这里收录新版校园试玩使用的知乎片段。检索日期：2026-09-14。</p>
             </div>
           </section>
         </div>
@@ -1185,16 +1135,16 @@ function MethodologyDialog({ onClose, pendingCount }: { onClose: () => void; pen
         <section className="source-register" aria-labelledby="source-register-title">
           <div className="source-register-head">
             <div><span>03 / REAL VOICES</span><h3 id="source-register-title">打开这些真实回答</h3></div>
-            <p>每张索引卡都通向知乎原文。故事从这里来，也可以回到这里核对。</p>
+            <p>每张索引卡都通向知乎原文。可核对作者、原文与上下文；试玩故事独立虚构。</p>
           </div>
           <div className="source-register-list">
-            {programmingMethodology.sourcePages.map((page) => (
+            {campusSources.map(item => ({...item, url: item.sourceUrl, answerCountShown: 0})).map((page) => (
               <a href={page.url} target="_blank" rel="noreferrer" key={page.id}>
                 <span className={`source-author-avatar ${page.avatarUrl ? 'has-avatar' : ''}`}>
                   {page.avatarUrl && <img loading="lazy" decoding="async" src={page.avatarUrl} alt={`${page.author}的知乎头像`} referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.display = 'none' }} />}
                   <i>{page.author.slice(0, 1)}</i>
                 </span>
-                <div><em>知乎答主 · {page.author}</em><strong>{page.title}</strong><small>{page.access === 'full' ? '原文完整可查' : '原文搜索摘要'}{page.answerCountShown ? ` · ${page.answerCountShown} 个回答` : ''}</small></div>
+                <div><em>知乎答主 · {page.author}</em><strong>{page.title}</strong><small>{'知乎 API 检索片段'}{page.answerCountShown ? ` · ${page.answerCountShown} 个回答` : ''}</small></div>
                 <ArrowSquareOut size={16} />
               </a>
             ))}
@@ -1203,7 +1153,7 @@ function MethodologyDialog({ onClose, pendingCount }: { onClose: () => void; pen
 
         <footer className="method-foot">
           <FileSearch size={16} />
-          <p>页面中的作者、摘要与链接来自可回查来源；日期、冲突、选项和结果属于基于来源的模拟改编。</p>
+          <p>页面中的作者、摘要与链接来自可回查来源；日期、冲突、选项和结果属于独立虚构试玩，公开片段仅作现实参照。</p>
           <span>请把它当作试走，不要当作预测。</span>
         </footer>
       </div>
@@ -1561,11 +1511,11 @@ function Home({
   }, [choiceImpact?.id])
   const reading = getSituationReading(situation)
   const activeUniverse = careerUniverses[activeUniverseIndex]
-  const activeUniverseVoice = featuredVoices[activeUniverse.sourceIndex]
+  const activeUniverseVoice = activeRunEvidenceVoice(activeUniverse.code)
   const activeRun = universeRuns[activeUniverse.code]
   const forkKey = forkIdentity(activeRun, simulationProfile, simulationCycle)
   const forkEligible = activeRun.currentEvent.day === 30 && activeRun.currentEvent.choices.length === 2
-    && (Boolean(activeRun.route) || activeRun.currentEvent.id === 'a-day-30-critical-fork') && forkBypass !== forkKey
+    && (Boolean(activeRun.route) || activeRun.currentEvent.id.startsWith('campus-')) && forkBypass !== forkKey
   const previousDecision = activeRun.decisions[activeRun.decisions.length - 1]
   const currentEchoContext: EchoContext = {
     code: activeUniverse.code,
@@ -1580,7 +1530,7 @@ function Home({
   const evidenceContextId = echoIdentity(currentEchoContext)
   const previousResult = activeRun.route ? '' : previousDecision
     ? previousDecision.actionOutcome?.observableChange ?? previousDecision.actionOutcome?.tradeoff ?? previousDecision.tradeoff ?? '时间已经投入这条路，做过的事慢慢留下了痕迹。'
-    : ({ A: '这段时间，课程和练习占据了你的晚上。你想把基础学扎实，再独立做出一个作品。', B: '一个真实任务成了你的练习场。你借助 AI 搭起工具，遇到不会的地方，再回头学一点代码。', C: '你把更多时间留给了本专业。比起追上每一种新工具，你更想先把手头的问题看深一点。' }[activeUniverse.code])
+    : ({ A: '那天晚上，你先回复了店长，问清排班和工资。', B: '那天晚上，你打开简历，把自己做过的事一项项写进去。', C: '那天晚上，你给朋友发了消息：先把预算和分工说清，再报名。' }[activeUniverse.code])
   const activeEventEvidence = activeRun.currentEvent.evidenceIds
     .map((id) => programmingEvidenceById.get(id))
     .filter((item): item is Evidence => Boolean(item))
@@ -1728,6 +1678,14 @@ function Home({
     liveEvidenceActiveKeyRef.current = cacheKey
     setLiveEvidenceError('')
 
+    if (judgeDemoActive) {
+      setLiveEvidence({ items: campusSources.filter(item => activeRun.currentEvent.evidenceIds.includes(item.id)).map(item => ({
+        ...item, badge: '已保存的知乎 API 摘录', comments: 0, authorityLevel: '', rankingScore: 0, relevanceScore: 1, editedAt: '',
+      })), retrievedAt: campusSources[0].retrievedAt, cachedAt: Date.now() })
+      setLiveEvidenceLoading(false)
+      return
+    }
+
     const cached = readLiveEvidence(simulationProfile, eventId)
     if (cached) {
       setLiveEvidence(cached)
@@ -1776,7 +1734,7 @@ function Home({
       .finally(() => {
         if (liveEvidenceActiveKeyRef.current === cacheKey) setLiveEvidenceLoading(false)
       })
-  }, [evidenceContextId, liveEvidenceRetry, scene, simulationProfile])
+  }, [evidenceContextId, liveEvidenceRetry, scene, simulationProfile, judgeDemoActive])
 
   useGSAP(() => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -1961,7 +1919,7 @@ function Home({
     setUniverseRuns(demoRuns)
     setFutureChats({ A: [], B: [], C: [] })
     setFutureQuestion('这条路让我真正获得了什么，又失去了什么？')
-    setDebateQuestion('每周只有 2 小时，我应该先获得哪一种能力，又愿意承受什么代价？')
+    setDebateQuestion('兼职、实习、和朋友摆市集：不耽误课业的前提下，我愿意把课余时间花在哪儿？')
     setDebate(null)
     setExperiment(null)
     setExperimentProgress(emptyExperimentProgress())
@@ -1976,7 +1934,8 @@ function Home({
     setExperienceMode('quick')
     setQuickArrival(null)
     setChoiceImpact(null)
-    setActiveUniverseIndex(1)
+    setActiveUniverseIndex(0)
+    setRouteEntered(false)
     setIsUniverseOpen(false)
     setSimulationGenerationNote('三分钟试玩已就绪：从同一个起点出发，每个宇宙由你亲手决定第一步。')
     setJudgeDemoActive(true)
@@ -2369,16 +2328,16 @@ function Home({
           { speaker: 'B', challenges: 'A', memoryRef: titles.B, text: `“${titles.B}”只是一次模拟。A，如果只试七天，你会先验证哪一件事？` },
           { speaker: 'C', challenges: 'B', memoryRef: titles.C, text: `我会带着“${titles.C}”回看目标。B，你愿意为下一次尝试付出怎样的代价？` },
         ] : [
-          { speaker: 'A', challenges: null, memoryRef: titles.A, text: `我的时间线留下“${titles.A}”。代码比以前看得懂了，可一直在学，拿给别人看的东西太少。` },
-          { speaker: 'B', challenges: 'A', memoryRef: titles.B, text: `我的时间线留下“${titles.B}”。A，你还打算准备多久？学到哪一步，才肯拿出来给人看？` },
-          { speaker: 'C', challenges: 'B', memoryRef: titles.C, text: `我的时间线留下“${titles.C}”。B，做得快我承认。可结果错了，你看得出来吗？` },
-          { speaker: 'A', challenges: 'B', memoryRef: titles.A, text: '我也羡慕做得快。可一报错就没办法，那种着急我受够了。' },
-          { speaker: 'B', challenges: 'C', memoryRef: titles.B, text: 'C，你总说专业判断重要。那就挑一个具体结果，告诉我哪里不对，别只说感觉。' },
-          { speaker: 'C', challenges: 'A', memoryRef: titles.C, text: '我可以拿案例把判断讲清楚。A，我就想问，你真的有时间把每件事都从头学会吗？' },
+          { speaker: 'A', challenges: null, memoryRef: titles.A, text: `我这边是“${titles.A}”。工资到账的时候很踏实，可我的晚上也有成本。B，你那份实习到底有没有人带？` },
+          { speaker: 'B', challenges: 'A', memoryRef: titles.B, text: `我留下的是“${titles.B}”。实习不会自动变成成长。A，如果每次缺人都找你，你准备在哪一次说不？` },
+          { speaker: 'C', challenges: 'B', memoryRef: titles.C, text: `我这边是“${titles.C}”。摆摊前只想到和朋友一起热闹，后来才发现，钱怎么分、谁多做了，都会影响心情。` },
+          { speaker: 'A', challenges: 'C', memoryRef: titles.A, text: `回看“${titles.A}”，有些钱得用休息时间换。C，你算成本时，把自己和朋友准备的晚上算进去了吗？` },
+          { speaker: 'B', challenges: 'C', memoryRef: titles.B, text: `想到“${titles.B}”，我觉得开口问清楚挺难，但一直猜更累。C，你还想继续，是因为喜欢摆摊，还是不好意思拒绝朋友？` },
+          { speaker: 'C', challenges: 'A', memoryRef: titles.C, text: `“${titles.C}”还不是标准答案。A，下次先把课表拿出来吧。我们都不用靠把每个周末塞满，证明自己没闲着。` },
         ],
-        conflictCore: generatedRoutesReady ? '三条路留下了不同记录：哪些值得继续投入，哪些代价需要先验证？' : '时间不够：想自己弄懂，想早点做完，也舍不得放下本专业。',
+        conflictCore: generatedRoutesReady ? '三条路留下了不同记录：哪些值得继续投入，哪些代价需要先验证？' : '生活费、第一份工作经验、和朋友做事都想要，但课业、休息和时间不能无限让步。',
         commonGround: '三条路都需要真实反馈，也都不能把一次模拟当成职业预测。',
-        experimentSeed: { action: '选一个真实小任务，用两种路线各做30分钟并记录卡点', successSignal: '能明确说出哪条路线减少了卡点，又新增了什么代价' },
+        experimentSeed: { action: '用一周问清兼职排班、实习出勤和市集成本，再选一个最想试的方向', successSignal: '能把真实条件放进课表，写清愿意付出的时间和不接受的条件' },
         closingQuestion: `回到“${question}”：你愿意先花一周试哪种做法？`,
       })
       setDebateError(liveAiActive ? '在线生成暂时没响应，下面的对话由本地模板结合本轮三条路线整理。' : '示例对话 · 结合本轮结局展示，未调用实时 AI。')
@@ -2412,7 +2371,7 @@ function Home({
       setCalibrationNote('')
       trackTelemetry('experiment_generated')
     } catch {
-      setExperiment(createFallbackExperiment(debate))
+      setExperiment(judgeDemoActive ? campusComparisonExperiment() : createFallbackExperiment(debate))
       setExperimentProgress(emptyExperimentProgress())
       setExperimentError(liveAiActive ? '在线生成暂时没响应，已根据这场讨论安排一份本地七天计划。' : '示例七天计划 · 可以记录执行结果，再进入下一轮。')
       trackTelemetry('experiment_generated')
@@ -2590,7 +2549,7 @@ function Home({
 
   return (
     <main className={`wz-home paper-experience wz-scene-${scene} ${isUniverseOpen ? `is-universe-open universe-${activeUniverse.code.toLowerCase()}` : ''} ${reading.isGap ? 'is-gap' : 'has-answers'}`} ref={homeRef}>
-      {echoContext && <RealityEchoLetter context={echoContext} onClose={() => setEchoContext(null)} onAdjust={scene === 2 && activeRun.currentEvent.day < 180 ? () => {
+      {echoContext && <RealityEchoLetter savedLetters={judgeDemoActive ? campusSources.filter(item => item.id.startsWith(`campus-${echoContext.code.toLowerCase()}`)) : undefined} context={echoContext} onClose={() => setEchoContext(null)} onAdjust={scene === 2 && activeRun.currentEvent.day < 180 ? () => {
         setEchoContext(null)
         setFreeActionOpen(true)
         window.setTimeout(() => {
@@ -2638,7 +2597,7 @@ function Home({
               <span className="paper-eyebrow">出发之前 · {profileStep + 1} / 2</span>
               <h2>{profileStep === 0 ? <>有件事，<br />你一直拿不定主意。</> : <>想试新路，<br />也有舍不得的东西。</>}</h2>
               {profileStep === 0 ? <>
-                <label className="paper-field">此刻，你在犹豫什么？<textarea aria-label="写下你此刻真正卡住的问题" value={situation.confusion} onChange={event => setSituation(current => ({...current, confusion: event.target.value}))} maxLength={240} rows={2} placeholder="例如：继续本专业，还是试试 AI？" /></label>
+                <label className="paper-field">此刻，你在犹豫什么？<textarea aria-label="写下你此刻真正卡住的问题" value={situation.confusion} onChange={event => setSituation(current => ({...current, confusion: event.target.value}))} maxLength={240} rows={2} placeholder="例如：去兼职挣生活费，还是先找份实习？" /></label>
                 <label className="paper-field">半年后，你希望做成什么？<input aria-label="180 天后的目标" value={situation.goal} onChange={event => setSituation(current => ({...current, goal: event.target.value}))} maxLength={200} placeholder="例如：一个能展示的小作品" /></label>
                 <div className="paper-profile-footer"><p>{profileReady ? '就从这件让你犹豫的事开始。' : '问题和目标各写至少 4 个字。'}</p><button className="paper-primary" disabled={!profileReady} onClick={() => {setProfileStep(1); document.querySelector('.wz-locate')?.scrollTo({top:0})}}>继续 <ArrowRight size={22}/></button></div>
               </> : <>
@@ -2662,7 +2621,7 @@ function Home({
             </header>
 
             {!routeEntered && LIVE_AI_ENABLED && experienceMode === 'full' && !generatedRoutesReady && <div className="route-generation" role="status"><PaperAccent kind="unfolding-paths" placement="waiting" waiting={simulationGenerating} /><h2>{simulationGenerating ? '正在展开你的三条路' : '这次还没写完'}</h2><p>{simulationGenerationNote}</p>{!simulationGenerating && <button className="paper-primary" onClick={beginSimulation}>重新生成三条路径</button>}</div>}
-            {!routeEntered && (!LIVE_AI_ENABLED || experienceMode === 'quick' || generatedRoutesReady) && <UniverseDoors routes={careerUniverses} complete={careerUniverses.filter(item => universeRuns[item.code].currentEvent.day === 180).map(item => item.code)} onEnter={index => {
+            {!routeEntered && (!LIVE_AI_ENABLED || experienceMode === 'quick' || generatedRoutesReady) && <UniverseDoors opening={judgeDemoActive || experienceMode === 'quick' ? campusOpening : undefined} routes={careerUniverses} complete={careerUniverses.filter(item => universeRuns[item.code].currentEvent.day === 180).map(item => item.code)} onEnter={index => {
               setActiveUniverseIndex(index); setChoiceImpact(null); setRouteEntered(true)
               trackTelemetry('route_enter', { routeCode: careerUniverses[index]?.code })
               document.querySelector('.wz-view.wz-universes')?.scrollTo({ top: 0 })
@@ -2714,7 +2673,7 @@ function Home({
                           maxLength={240}
                           disabled={freeActionPending}
                           aria-describedby={freeActionError ? `free-action-error-${activeUniverse.code}` : undefined}
-                          placeholder="例如：先找两位同学试用一周，记录他们卡住的位置，再决定补基础还是继续迭代。"
+                          placeholder="例如：先把课表发过去，说明周末只空半天，再确认任务和结束时间。"
                           onChange={(inputEvent) => {
                             updateActionDraft(inputEvent.target.value)
                             if (freeActionError) setFreeActionError(null)
@@ -2873,13 +2832,13 @@ function Home({
                   </details>}
                   <div className="wz-live-evidence" aria-live="polite">
                   <div className="wz-live-evidence-head">
-                    <span><i /> 知乎实时检索</span>
-                    <small>仅使用档案类型与通用冲突 · {formatEvidenceTime(liveEvidence?.retrievedAt)}</small>
+                    <span><i /> {judgeDemoActive ? '知乎 API 摘录 · 2026-09-14 检索' : '知乎实时检索'}</span>
+                    <small>{judgeDemoActive ? '已保存的公开片段 · 可返回知乎核对' : `仅使用档案类型与通用冲突 · ${formatEvidenceTime(liveEvidence?.retrievedAt)}`}</small>
                   </div>
                   {liveEvidenceLoading && <div className="wz-live-evidence-status"><CircleDashed size={14} /> 正在寻找与这个冲突相似的真人经历…</div>}
                   {liveEvidenceError && (
                     <div className="wz-live-evidence-status is-error">
-                      <span>实时检索未接通，当前剧情仍由内置证据支撑。</span>
+                      <span>实时检索未接通，可先阅读下方已保存的来源片段。</span>
                       <button type="button" onClick={retryLiveEvidence}>重试</button>
                     </div>
                   )}
@@ -3118,9 +3077,9 @@ function Home({
                   ))}
                 </div>
                 <div className="wz-future-notes" aria-hidden="true">
-                  <p>我想弄懂它，<br />不想一出错就求人。<small>未来的你 · A</small></p>
-                  <p>我想先做出来，<br />总等准备好太累了。<small>未来的你 · B</small></p>
-                  <p>我学了这么久，<br />还想再给专业一次机会。<small>未来的你 · C</small></p>
+                  <p>我想自己挣点钱，<br />也想留点时间休息。<small>未来的你 · A</small></p>
+                  <p>我想知道上班什么样，<br />也得问清谁来带我。<small>未来的你 · B</small></p>
+                  <p>我想和朋友一起做，<br />也不想一个人全扛。<small>未来的你 · C</small></p>
                 </div>
               </div>
               <img className="wz-return-kanshan" loading="lazy" decoding="async" src="/kanshan-wave.gif" alt="刘看山带着行动票回到现实" />

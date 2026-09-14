@@ -19,6 +19,9 @@ export function echoIdentity(context: EchoContext) {
 }
 
 const comparisonTopics = [
+  { label: '兼职与课业', terms: ['兼职', '课业', '排班', '上课', '作业'] },
+  { label: '实习与沟通', terms: ['实习', '简历', '带教', '领导', '沟通'] },
+  { label: '摆摊与成本', terms: ['摆摊', '市集', '摊位', '成本', '分工', '朋友', '进货'] },
   { label: '时间投入', terms: ['时间', '小时', '分钟', '每周', '耗时'] },
   { label: '基础与学习', terms: ['基础', '学习', '课程', '教程', '编程'] },
   { label: 'AI 的使用与核对', terms: ['AI', '人工智能', '模型', 'ChatGPT'] },
