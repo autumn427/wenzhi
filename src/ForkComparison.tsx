@@ -1,10 +1,28 @@
-import { ThumbsUp } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, BookOpen, CaretRight, Check, Paperclip, ThumbsUp } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { chooseUniverseFreeAction, chooseUniversePath, isGeneratedActionSource, type GeneratedFreeAction, type SimulationProfile, type UniverseRun } from './simulation'
 import { acceptsNextAction, normalizedAction } from './action-submission'
 import { compareEcho, type EchoContext } from './echo-context'
 import { forkIdentity, keepForkResult, pickForkSource, readForkRecord, type ForkRecord, type ForkResult, type ForkSource } from './fork-comparison'
 import './fork-comparison.css'
+
+const sceneBackgrounds = {
+  A: '/assets/galgame/parttime-blue.png',
+  B: '/assets/galgame/internship-amber.png',
+  C: '/assets/galgame/market-green.png',
+}
+
+// Keep the authored story intact, but give each dialogue beat a readable length.
+function dialogueBeats(story: string) {
+  const sentences = story.match(/[^。！？\n]+[。！？]?|\n/g) ?? [story]
+  const beats: string[] = []
+  for (const sentence of sentences) {
+    const last = beats.length - 1
+    if (last >= 0 && beats[last].length + sentence.length <= 65) beats[last] += sentence
+    else if (sentence.trim()) beats.push(sentence.trim())
+  }
+  return beats.length ? beats : ['这一刻，你停下来想了想。']
+}
 
 export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, evidence, sourceLoading, sourceError, context, allowFallback, onBusy, onCommit, onCustom, onRetrySource }: {
   run: UniverseRun; profile: SimulationProfile; cycle: number; demo: boolean; live: boolean;
@@ -24,20 +42,28 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
   const [saved, setSaved] = useState(true)
   const controller = useRef<AbortController | null>(null)
   const mounted = useRef(true)
-  const resultsRef = useRef<HTMLDivElement>(null)
   const root = useRef<HTMLElement>(null)
+  const dialogueRef = useRef<HTMLDivElement>(null)
+  const choicesRef = useRef<HTMLDivElement>(null)
   const source = record ? record.source : pickForkSource(evidence, context)
   const comparison = source ? compareEcho(context, source) : null
   const results = record?.results ?? []
   const choices = run.currentEvent.choices.slice(0, 2)
+  const beats = dialogueBeats(run.currentEvent.story)
+  const [beat, setBeat] = useState(record?.results.length ? beats.length : 0)
+  const [previewChoice, setPreviewChoice] = useState<string | null>(record?.results[record.results.length - 1]?.choiceId ?? null)
+  const preview = results.find(result => result.choiceId === previewChoice)
+  const choosing = beat >= beats.length
+  const routeTitle = run.route?.title ?? ({ A: '去店里兼职', B: '投第一份实习', C: '和朋友摆市集' }[run.code])
+  useEffect(() => {
+    if (previewChoice) dialogueRef.current?.focus({ preventScroll: true })
+    else if (choosing) choicesRef.current?.focus({ preventScroll: true })
+  }, [choosing, previewChoice])
   useEffect(() => {
     mounted.current = true
     root.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
     return () => { mounted.current = false; controller.current?.abort(); onBusy(false) }
   }, [onBusy])
-  useEffect(() => {
-    if (results.length) resultsRef.current?.focus({ preventScroll: false })
-  }, [results.length])
   const persist = (next: ForkRecord) => {
     recordRef.current = next; setRecord(next)
     if (demo) demoRecords.set(identity, next)
@@ -84,6 +110,7 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
         sourceIds,
       }
       persist(keepForkResult(recordRef.current ?? frozen, run, result))
+      setPreviewChoice(choiceId)
     } catch (failure) {
       if (mounted.current) setError(abort.signal.aborted ? '试选等待超时，原路线和已完成的试选没有改变。请重试。' : failure instanceof Error ? failure.message : '试选暂不可用，请重试。')
     } finally {
@@ -91,33 +118,48 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
       if (mounted.current) { setBusy(''); onBusy(false) }
     }
   }
-  return <section ref={root} className="fork-workshop" aria-label="同一处境，试两种做法">
-    <div className="fork-main">
-    <header className="fork-intro"><div><span className="fork-eyebrow">第 {run.currentEvent.day} 天</span>
-      <h2>{run.currentEvent.title}</h2><p>{run.currentEvent.story}</p><strong>{run.currentEvent.tension}</strong></div></header>
-    <div className="fork-choices">{choices.map((choice, index) => {
-      const tried = results.some(result => result.choiceId === choice.id)
-      return <button type="button" key={choice.id} disabled={Boolean(busy) || tried} onClick={() => void tryChoice(choice.id)}>
-        <span className="fork-eyebrow">选择 {index + 1}{tried ? ' · 已试过' : ''}</span>
-        <strong>{choice.label}</strong><span>{choice.tradeoff}</span><b aria-hidden="true">{tried ? '✓' : '→'}</b></button>
-    })}</div>
-    <div className="fork-choice-footer"><span>先看后果，再决定是否继续。</span><button className="fork-custom" type="button" disabled={Boolean(busy)} onClick={onCustom}>我有别的做法 →</button></div>
-
-    {busy && <p role="status">正在展开下一幕…</p>}
-    {error && <p className="fork-error" role="alert">{error}</p>}
-    {results.length > 0 && <div className="fork-results" ref={resultsRef} tabIndex={-1}>
-      <h3>{results.length === 2 ? '两种选择，两个后续' : '如果这样选…'}</h3>
-      <div className="fork-result-grid">{results.map(result => <article key={result.choiceId}>
-        <span className="fork-eyebrow">做法 {choices.findIndex(c => c.id === result.choiceId) + 1} · {run.route ? 'AI 模拟' : '预设模拟'}</span>
-        <h4>{result.action}</h4><dl><dt>留下了什么 · 模拟记录</dt><dd>{result.run.currentEvent.story}</dd>
-          <dt>付出了什么</dt><dd>{result.cost}</dd><dt>仍待弄清</dt><dd>{result.remaining}</dd></dl>
-        <small>{result.sourceIds.length ? '本幕引用了知乎摘录作为参照。' : '本幕没有引用知乎内容作为后果依据。'}</small>
-        <button type="button" disabled={Boolean(busy)} onClick={() => onCommit(structuredClone(result.run))}>沿做法 {choices.findIndex(c => c.id === result.choiceId) + 1} 继续 →</button>
-      </article>)}</div>
-      <p className="fork-footnote">{demo ? '试玩记录仅在本次页面内保留。' : saved ? '已保存到当前浏览器，刷新可回看。' : '浏览器未能保存，关闭页面后试选记录可能丢失。'} {run.route ? 'AI 输出仍可能存在生成差异；固定条件不等于真实因果实验。' : '预设后果固定，不因重新打开而改变。'}</p>
-    </div>}
-    </div>
+  return <section ref={root} className={`fork-workshop gal-scene${choosing ? ' is-choosing' : ''}`} data-universe={run.code} aria-label="纸上故事，试试你的选择">
+    <img className="gal-backdrop" src={sceneBackgrounds[run.code]} alt="" aria-hidden="true" fetchPriority="high" />
+    <header className="gal-chapter">
+      <span>第 {run.currentEvent.day} 天 <i aria-hidden="true" /> {routeTitle}</span>
+      <h2>{run.currentEvent.title}</h2>
+    </header>
+    <div className="gal-scene-body">
+      <div className="fork-main">
+        {choosing && !preview && <div className="gal-choice-stack" ref={choicesRef} tabIndex={-1} aria-label="你的选择">
+          {choices.map((choice, index) => {
+            const tried = results.some(result => result.choiceId === choice.id)
+            return <button type="button" key={choice.id} disabled={Boolean(busy)} onClick={() => tried ? setPreviewChoice(choice.id) : void tryChoice(choice.id)}>
+              <span className="gal-choice-index">{tried ? <Check size={17} aria-hidden="true" /> : `0${index + 1}`}</span>
+              <span className="gal-choice-copy"><strong>{choice.label}</strong><small>{tried ? '已试过 · 回看后续' : choice.tradeoff}</small></span>
+              <CaretRight size={20} aria-hidden="true" />
+            </button>
+          })}
+        </div>}
+        <div className={`gal-dialogue ${preview ? 'is-preview' : ''}`} ref={dialogueRef} tabIndex={-1} aria-label={preview ? '试选后续故事' : '当前故事'}>
+          <div className="gal-speaker"><BookOpen size={18} aria-hidden="true" /><span>{preview ? '如果这样选…' : choosing ? '心里想' : '旁白'}</span><small>{preview ? '试选后续' : choosing ? '轮到你了' : `${beat + 1} / ${beats.length}`}</small></div>
+          <div className="gal-dialogue-text" aria-live="polite" aria-atomic="true">
+            {preview ? <><h3>{preview.run.currentEvent.title}</h3><p>{preview.run.currentEvent.story}</p></> : <p key={beat}>{choosing ? run.currentEvent.tension : beats[beat]}</p>}
+          </div>
+          {preview && <details className="gal-outcome-detail"><summary>看看这次选择的取舍</summary><p>{preview.cost}</p><p>{preview.remaining}</p><small>{preview.sourceIds.length ? '知乎摘录仅作参照。' : '后续为虚构模拟。'} {demo ? '试玩记录仅在本次页面内保留。' : saved ? '已保存在当前浏览器。' : '浏览器未能保存，请保留当前页面。'}</small></details>}
+          {busy && <p className="gal-status" role="status">正在展开下一幕…</p>}
+          {error && <p className="fork-error" role="alert">{error}</p>}
+          <footer className="gal-dialogue-actions">
+            {preview ? <>
+              <button type="button" className="gal-text-button" onClick={() => setPreviewChoice(null)}><ArrowLeft size={16} />回到选择</button>
+              <button type="button" className="gal-next" disabled={Boolean(busy)} onClick={() => onCommit(structuredClone(preview.run))}>沿这个选择继续 <ArrowRight size={18} /></button>
+            </> : choosing ? <>
+              <button type="button" className="gal-text-button" disabled={Boolean(busy)} onClick={() => setBeat(0)}><ArrowLeft size={16} />重读故事</button>
+              <button type="button" className="gal-text-button" disabled={Boolean(busy)} onClick={onCustom}>我有别的做法 <ArrowRight size={16} /></button>
+            </> : <>
+              <div className="gal-reading-tools">{beat > 0 && <button type="button" className="gal-text-button" onClick={() => setBeat(beat - 1)} aria-label="上一段故事"><ArrowLeft size={16} /></button>}<button type="button" className="gal-text-button" onClick={() => setBeat(beats.length)}>直接选择</button></div>
+              <button type="button" className="gal-next" onClick={() => setBeat(beat + 1)}>{beat === beats.length - 1 ? '看看我的选择' : '继续'}<CaretRight size={18} /></button>
+            </>}
+          </footer>
+        </div>
+      </div>
     <aside className="fork-source" aria-label="知乎现实参照">
+      <Paperclip className="gal-source-clip" size={34} weight="light" aria-hidden="true" />
       <div className="fork-source-brand"><img src="/zhihu-logo.svg" alt="知乎" /><span>现实参照</span></div>
       {source && comparison ? <>
         <div className="fork-source-author">
@@ -129,5 +171,6 @@ export function ForkComparison({ run, profile, cycle, demo, demoRecords, live, e
         <div className="fork-source-stats"><span><ThumbsUp size={16} aria-hidden="true" />{typeof source.votes === 'number' && Number.isFinite(source.votes) ? `${source.votes.toLocaleString('zh-CN')} 赞同` : '赞同数未提供'}</span><a href={source.sourceUrl} target="_blank" rel="noreferrer">查看原文 ↗</a></div>
       </> : <div className="fork-source-empty"><p>{sourceLoading ? '正在寻找相关经历…' : '暂时没有合适的参照，不影响选择。'}</p>{!record && !sourceLoading && <button type="button" onClick={onRetrySource}>重新查找</button>}</div>}
     </aside>
+    </div>
   </section>
 }

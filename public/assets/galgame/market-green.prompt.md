@@ -1,0 +1,11 @@
+Generation: built-in image_gen; no reference images; output 1672 × 941 PNG.
+
+Use case: stylized-concept
+Asset type: 16:9 visual-novel game background, 2048x1152 landscape.
+Primary request: An original handcrafted PAPER-CUT RELIEF SHADOWBOX depicting a small student craft market in a modern Chinese university courtyard. This must look like an actual intricate multilayer cut-paper artwork, NOT a flat illustration and NOT a miniature plastic dollhouse.
+Scene: one simple awning stall and folding table, a modest few handmade paper bookmarks and booklets, small craft items, cardboard supply boxes, a strand of triangular paper bunting, courtyard trees and simple modern academic building and corridor silhouettes. A quiet moment before a low-budget campus stall opens.
+Material construction: every leaf, awning plane, tree, building facade and stall object is made of visibly thin, flat matte colored cardstock silhouettes; a dozen separated parallel layers create deep hollow cutout apertures, visibly stacked contour edges and distinct gentle cast shadows BETWEEN the paper sheets. Fine paper fiber texture. Cut edges are precise, actual planar cardstock rather than rounded objects. Spacious, elegant composition.
+Color palette: sage green, pine green, olive, moss, muted #568567 route green and warm ivory only; no other strong color accents.
+Composition: wide cinematic 16:9 frontal paper-theatre scene. Stall and storytelling objects mainly upper and middle left, occupying left two-thirds. Rightmost quarter quieter muted green foliage and a simple unlettered campus wall, reserved for a live white article card overlay. Bottom thirty percent broad quiet dark-green layered paper foreground, reserved for live dialogue overlay. These are natural scene areas; do NOT draw UI boxes or placeholders.
+Lighting: soft raking side light gives crisp legible paper-layer shadows, tranquil afternoon, tactile and dimensional.
+Constraints: entirely new composition. No mountains, no ancient temples, no fantasy valleys. No people, no animals, no mascot, no Liu Kanshan. No writing, numbers, readable lettering, logos, watermarks, interface, speech bubbles or frames. No watercolor painting, no brushwork, no plasticky 3D objects, no photographic real-world buildings, no rounded clay shapes, no excessive clutter.

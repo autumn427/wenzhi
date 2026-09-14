@@ -1,2 +1,6 @@
 OPENAI_NEXT_API_KEY=replace-with-your-relay-key
 OPENAI_NEXT_BASE_URL=https://api.openai-next.com
+# Run the local Worker instead of the production Node gateway.
+NODE_BACKEND_ORIGIN=
+# Optional: enable live Zhihu search with your server-side secret.
+# ZHIHU_ACCESS_SECRET=

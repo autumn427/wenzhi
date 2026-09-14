@@ -14,7 +14,11 @@ node --experimental-strip-types scripts/test-relay-ai.mjs
 npm run dev:cloudflare
 ```
 
-仅运行 Vite 不提供 Worker API。通过 Wrangler 地址打开正常首页进行完整测试。
+需要前端热更新时，在另一个终端运行 `npm run dev`，打开 Vite 地址（默认 `http://localhost:5173`）。Vite 将 `/api` 代理至本地 Wrangler（`http://127.0.0.1:8787`），并转换同源请求的 Origin；外部来源仍由后端拒绝。仅运行 Vite 不提供 Worker API，也可以直接通过 Wrangler 地址打开构建后的首页。
+
+本地 `.dev.vars` 中保留 `NODE_BACKEND_ORIGIN=`，覆盖部署配置中的生产网关地址。填写 `OPENAI_NEXT_API_KEY` 才能生成个性化剧情；如需实时知乎检索，还需填写 `ZHIHU_ACCESS_SECRET`。只有 `YEAKO_API_KEY` 备用密钥不能启用主生成服务。
+
+启动后检查 `/api/health`：`status: "ok"` 只说明服务已启动，`generationProvider` 非空才表示配置了主生成服务（仍需实际请求验证密钥有效性）；`zhihu: true` 表示已配置知乎接口密钥。
 
 ## 发布
 

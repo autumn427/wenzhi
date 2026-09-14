@@ -27,13 +27,14 @@ export function pickForkSource(items: ForkSource[], context: EchoContext): ForkS
 }
 
 export function validForkResult(base: UniverseRun, result: ForkResult) {
+  const nextDay = base.currentEvent.day === 30 ? 90 : base.currentEvent.day === 90 ? 150 : base.currentEvent.day === 150 ? 180 : null
   const decision = result?.run?.decisions?.[result.run.decisions.length - 1]
-  return Boolean(result && base.currentEvent.choices.some(c => c.id === result.choiceId && c.label === result.action)
-    && result.run?.code === base.code && result.run.currentEvent?.day === 90
+  return Boolean(nextDay && result && base.currentEvent.choices.some(c => c.id === result.choiceId && c.label === result.action)
+    && result.run?.code === base.code && result.run.currentEvent?.day === nextDay
     && result.run.state && Object.values(result.run.state).every(value => typeof value === 'number' && Number.isFinite(value))
     && Array.isArray(result.run.flags) && Array.isArray(result.run.closedOpportunities) && Array.isArray(result.run.workSamples)
     && typeof result.run.currentEvent.story === 'string' && typeof result.run.currentEvent.tension === 'string'
-    && Array.isArray(result.run.currentEvent.choices) && result.run.currentEvent.choices.length === 2
+    && Array.isArray(result.run.currentEvent.choices) && result.run.currentEvent.choices.length === (nextDay === 180 ? 0 : 2)
     && JSON.stringify(result.run.route) === JSON.stringify(base.route)
     && result.run.decisions.length === base.decisions.length + 1
     && JSON.stringify(result.run.decisions.slice(0, -1)) === JSON.stringify(base.decisions)

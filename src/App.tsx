@@ -1514,7 +1514,7 @@ function Home({
   const activeUniverseVoice = activeRunEvidenceVoice(activeUniverse.code)
   const activeRun = universeRuns[activeUniverse.code]
   const forkKey = forkIdentity(activeRun, simulationProfile, simulationCycle)
-  const forkEligible = activeRun.currentEvent.day === 30 && activeRun.currentEvent.choices.length === 2
+  const forkEligible = activeRun.currentEvent.day < 180 && activeRun.currentEvent.choices.length === 2
     && (Boolean(activeRun.route) || activeRun.currentEvent.id.startsWith('campus-')) && forkBypass !== forkKey
   const previousDecision = activeRun.decisions[activeRun.decisions.length - 1]
   const currentEchoContext: EchoContext = {

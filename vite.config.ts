@@ -22,7 +22,21 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://127.0.0.1:8787',
+      '/api': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+        configure(proxy) {
+          proxy.on('proxyReq', (proxyReq, request) => {
+            // Translate only same-origin dev requests to the Worker's origin.
+            // Foreign origins remain untouched so the backend still rejects them.
+            const origin = request.headers.origin
+            const host = request.headers.host
+            if (origin && host && origin === `http://${host}` && request.headers['sec-fetch-site'] !== 'cross-site') {
+              proxyReq.setHeader('Origin', 'http://127.0.0.1:8787')
+            }
+          })
+        },
+      },
     },
     fs: {
       // Keep Vite's default deny patterns and block Wrangler secret files too.
