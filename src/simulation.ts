@@ -1,4 +1,4 @@
-import { campusFirstEvents as firstEvents, campusSecondEvent as secondEvent, campusThirdEvent as thirdEvent, campusEnding as ending } from './campus-demo.ts'
+import { campusGrowth, campusFirstEvents as firstEvents, campusSecondEvent as secondEvent, campusThirdEvent as thirdEvent, campusEnding as ending } from './campus-demo.ts'
 import type { StoryRoute } from '../shared/story-routes'
 import type { MetricEvidenceMap } from '../shared/metric-evidence'
 
@@ -173,6 +173,7 @@ function applyNarrative(event: SimulationEvent, overrides?: Record<string, Narra
 
 // Refresh only recognized built-in endings; keep generated stories and all saved decisions.
 export function refreshLegacyEnding(run: UniverseRun): UniverseRun {
+  run = refreshCampusGrowth(run)
   const event = run.currentEvent
   if (event.day !== 180 || event.generatedFrom || event.generationSource ||
       run.decisions.some((decision) => decision.actionOutcome) ||
@@ -180,6 +181,22 @@ export function refreshLegacyEnding(run: UniverseRun): UniverseRun {
   if (!event.story.startsWith('回头看，每次选择都把你往这条路上推了一点。') &&
       !event.story.startsWith('半年的时间没有让所有问题都有答案，却让')) return run
   return { ...run, currentEvent: ending(run) }
+}
+
+/** Rebase only known preset choices; never rewrite generated/custom action evidence. */
+export function refreshCampusGrowth(run: UniverseRun): UniverseRun {
+  if (run.route || !run.currentEvent.id.startsWith('campus-') || run.workSamples?.length ||
+      run.decisions.some(d => !campusGrowth[d.choiceId] || d.actionOutcome) ||
+      (run.decisions.length > 0 && !run.decisions[0].stateBefore)) return run
+  const updateChoices = (event: SimulationEvent): SimulationEvent => ({...event,choices:event.choices.map(c=>campusGrowth[c.id] ? {...c,delta:{...c.delta,...campusGrowth[c.id]}} : c)})
+  let state = {...(run.decisions[0]?.stateBefore ?? run.state)}
+  const decisions = run.decisions.map(d => {
+    const delta = {...d.delta,...campusGrowth[d.choiceId]}
+    const stateBefore = {...state}
+    state = applyDelta(state,delta,d.stateAfter?.day ?? d.day)
+    return {...d,delta,stateBefore,stateAfter:{...state},eventSnapshot:d.eventSnapshot ? updateChoices(d.eventSnapshot) : undefined}
+  })
+  return {...run,state:{...state,day:run.state.day},decisions,currentEvent:updateChoices(run.currentEvent)}
 }
 
 function applyDelta(state: SimulationState, delta: StateDelta, nextDay: SimulationState['day']): SimulationState {

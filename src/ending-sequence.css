@@ -20,12 +20,28 @@
 .ending-beat.is-radar h2{font-size:28px}
 .ending-radar-scene{width:min(100%,900px)}
 .ending-radar-scene .state-radar{padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+.paper-experience .ending-radar-scene .state-radar{width:min(100%,440px);margin:0 auto;aspect-ratio:1122/1402;padding:22px 22px 85px!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;border-radius:0!important;box-sizing:border-box}
+.paper-experience .ending-radar-scene .state-radar.radar-tone-a{background-image:url('/radar-a-bg.png')!important}
+.paper-experience .ending-radar-scene .state-radar.radar-tone-b{background-image:url('/radar-b-bg.png')!important}
+.paper-experience .ending-radar-scene .state-radar.radar-tone-c{background-image:url('/radar-c-bg.png')!important}
 .ending-radar-scene .paper-section-heading,.ending-radar-scene .radar-mascot,.ending-radar-scene .radar-route{display:none!important}
 .ending-radar-scene .radar-stage{max-width:360px;margin:0 auto;min-height:0;background:none!important;border:0;box-shadow:none}
 .ending-radar-scene canvas{display:block;width:100%!important;height:auto!important;aspect-ratio:1}
 .ending-radar-scene .radar-legend,.ending-radar-scene .radar-timeline{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:8px 0}
 .ending-radar-scene .radar-data{max-width:620px;margin:auto;font-size:13px}
 .ending-radar-scene>p{text-align:center;color:#806e52;font-size:12px}
+.paper-experience .ending-radar-scene .state-radar[class]{width:100%;aspect-ratio:auto;padding:0!important;background-image:none!important}
+.radar-comparison{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);align-items:center;gap:32px}
+.paper-experience .ending-radar-scene .radar-comparison .radar-stage{width:100%;max-width:350px;aspect-ratio:1122/1402;padding:24px 12px 80px;box-sizing:border-box;background-size:cover!important;background-position:center!important}
+.paper-experience .ending-radar-scene .radar-stage-a{background-image:url('/radar-a-bg.png')!important}
+.paper-experience .ending-radar-scene .radar-stage-b{background-image:url('/radar-b-bg.png')!important}
+.paper-experience .ending-radar-scene .radar-stage-c{background-image:url('/radar-c-bg.png')!important}
+.paper-experience .radar-comparison .radar-data{width:100%;max-height:none;overflow:visible;margin:0;padding:18px;background:#fff9ee;border:1px solid #d9c6a8;box-sizing:border-box}
+.paper-experience .radar-comparison table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:15px}
+.paper-experience .radar-comparison caption{text-align:left;font-size:20px;padding:0 0 16px;color:#584730}
+.paper-experience .radar-comparison th,.paper-experience .radar-comparison td{padding:12px 8px;text-align:center;white-space:nowrap}
+.paper-experience .radar-comparison th:first-child{text-align:left}
+@media(max-width:700px){.radar-comparison{grid-template-columns:minmax(0,1fr);gap:18px}.paper-experience .ending-radar-scene .radar-comparison .radar-stage{max-width:330px}.paper-experience .radar-comparison .radar-data{padding:12px}.paper-experience .radar-comparison th,.paper-experience .radar-comparison td{padding:10px 4px;font-size:13px}}
 .ending-souvenir{position:relative;width:100%;aspect-ratio:1816/866;filter:drop-shadow(0 20px 25px #4c392c30);animation:ending-ticket-rise 1s cubic-bezier(.2,.8,.2,1) both}
 .ending-ticket-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .ending-ticket-copy{position:absolute;left:4%;top:14%;width:25%}

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
-import { createUniverseRuns, chooseUniversePath } from '../src/simulation.ts'
+import { createUniverseRuns, chooseUniversePath, refreshCampusGrowth } from '../src/simulation.ts'
 const bundle = await build({ entryPoints: ['src/fork-comparison.ts'], bundle: true, write: false, format: 'esm', platform: 'node' })
 const { forkIdentity, keepForkResult, readForkRecord, pickForkSource } = await import('data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].text).toString('base64'))
 const profile = { identity:'student', intent:'efficiency', time:'low', sacrifice:'study', confusion:'报错没有解决', skills:'刚开始学习', goal:'做一个小工具', worries:'不能影响课程' }
@@ -21,7 +21,7 @@ for(const choice of base.currentEvent.choices){
  assert.ok(next.currentEvent.story.includes(choice.id === 'a-take-shift' ? '提前交了两页作业' : '拒绝了补班'))
  assert.ok(next.currentEvent.story.includes('第90天'))
  assert.deepEqual(next.decisions[0].delta,choice.delta)
- assert.ok(['technicalSkill','aiCollaboration','domainDepth'].every(key=>(choice.delta[key]??0)===0),'a shift decision must not invent technical or AI skill gain')
+ assert.ok(['technicalSkill','aiCollaboration','domainDepth','portfolio','opportunity'].every(key=>Math.abs(choice.delta[key]??0)>=6),'campus steps should visibly change practical skills over the intervening weeks')
 }
 assert.equal(JSON.stringify(base),original,'preview must not mutate the original timeline')
 assert.notEqual(record.results[0].run.currentEvent.story,record.results[1].run.currentEvent.story)
@@ -66,3 +66,19 @@ function checkChapter(chapter) {
 Object.values(runs).forEach(checkChapter)
 assert.equal(endings,24)
 console.log('All 24 galgame paths passed: chapter 30 → 90 → 150 → 180, preview restoration and no chapter skipping.')
+
+// Existing preset progress is rebased consistently, without replaying choices.
+let campusRun=createUniverseRuns(profile).C
+while(campusRun.currentEvent.day<180) campusRun=chooseUniversePath(campusRun,campusRun.currentEvent.choices[1].id)
+const old=structuredClone(campusRun)
+let oldState={...old.decisions[0].stateBefore}
+for(const d of old.decisions){d.stateBefore={...oldState};d.delta={energy:d.delta.energy,confidence:d.delta.confidence??0};oldState={...oldState,confidence:oldState.confidence+d.delta.confidence,energy:Math.max(0,Math.min(100,oldState.energy+d.delta.energy)),day:d.day};d.stateAfter={...oldState}}
+old.state={...oldState,day:180}
+const rebased=refreshCampusGrowth(old)
+assert.deepEqual(rebased.state,campusRun.state)
+assert.deepEqual(refreshCampusGrowth(rebased),rebased,'migration must be idempotent')
+assert.deepEqual(rebased.decisions.map(d=>d.choiceId),old.decisions.map(d=>d.choiceId))
+for(let i=1;i<rebased.decisions.length;i++) assert.deepEqual(rebased.decisions[i].stateBefore,rebased.decisions[i-1].stateAfter)
+assert.ok(rebased.state.domainDepth<=100)
+assert.equal(refreshCampusGrowth({...old,route:{title:'custom'}}).state,old.state,'generated routes stay untouched')
+console.log('Campus growth migration passed: snapshots, clamping, idempotence, choices and custom isolation.')

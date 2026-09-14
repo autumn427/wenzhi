@@ -21,7 +21,29 @@ export const campusUniverses = [
   { code: 'C', tone: 'green', title: '和朋友摆市集', choice: '和朋友合一个小摊，先把预算和分工说清', fit: '想一起做点自己的事', preview: '从热闹的点子走到进货、记账和收摊。', future: '半年后，卖出去多少东西之外，你们还愿意一起做吗？', tension: '买材料要花钱，朋友的空闲时间也和你不同。', milestones: ['准备第一场市集', '清库存、算成本', '决定下次还做不做'], action: '先问主办方规则，再和朋友列一张预算表', sourceIndex: 2 },
 ] as const
 
-const choice = (id: string, label: string, tradeoff: string, delta: SimulationChoice['delta']): SimulationChoice => ({ id, label, tradeoff, delta, opens: [id], closes: [] })
+// Campus axes: execution, collaboration, judgement, outcomes and opportunities.
+// Each step represents the intervening weeks of practice, not a reward for one reply.
+export const campusGrowth: Record<string, SimulationChoice['delta']> = {
+  'a-take-shift': {technicalSkill:18, aiCollaboration:7, domainDepth:9, portfolio:12, opportunity:15},
+  'a-protect-meeting': {technicalSkill:10, aiCollaboration:18, domainDepth:13, portfolio:15, opportunity:6},
+  'a-fixed': {technicalSkill:19, aiCollaboration:12, domainDepth:10, portfolio:14, opportunity:17},
+  'a-one-shift': {technicalSkill:10, aiCollaboration:9, domainDepth:17, portfolio:11, opportunity:6},
+  'a-pause': {technicalSkill:8, aiCollaboration:10, domainDepth:18, portfolio:13, opportunity:-7},
+  'a-short-shift': {technicalSkill:14, aiCollaboration:13, domainDepth:11, portfolio:10, opportunity:9},
+  'b-negotiate': {technicalSkill:13, aiCollaboration:18, domainDepth:11, portfolio:10, opportunity:18},
+  'b-retarget': {technicalSkill:10, aiCollaboration:10, domainDepth:18, portfolio:16, opportunity:9},
+  'b-ask-task': {technicalSkill:19, aiCollaboration:16, domainDepth:14, portfolio:22, opportunity:17},
+  'b-observe': {technicalSkill:10, aiCollaboration:7, domainDepth:18, portfolio:11, opportunity:6},
+  'b-renew-bounded': {technicalSkill:16, aiCollaboration:18, domainDepth:13, portfolio:16, opportunity:19},
+  'b-finish': {technicalSkill:10, aiCollaboration:12, domainDepth:18, portfolio:21, opportunity:-6},
+  'c-cover': {technicalSkill:21, aiCollaboration:6, domainDepth:10, portfolio:20, opportunity:13},
+  'c-scale-down': {technicalSkill:13, aiCollaboration:21, domainDepth:15, portfolio:14, opportunity:9},
+  'c-preorder': {technicalSkill:17, aiCollaboration:18, domainDepth:16, portfolio:20, opportunity:19},
+  'c-clear-stock': {technicalSkill:12, aiCollaboration:15, domainDepth:20, portfolio:10, opportunity:-6},
+  'c-agree-roles': {technicalSkill:14, aiCollaboration:22, domainDepth:15, portfolio:17, opportunity:18},
+  'c-stop': {technicalSkill:8, aiCollaboration:14, domainDepth:20, portfolio:10, opportunity:-8},
+}
+const choice = (id: string, label: string, tradeoff: string, delta: SimulationChoice['delta']): SimulationChoice => ({ id, label, tradeoff, delta: {...delta,...campusGrowth[id]}, opens: [id], closes: [] })
 const event = (code: UniverseCode, day: SimulationEvent['day'], title: string, story: string, tension: string, choices: SimulationChoice[]): SimulationEvent => ({
   id: `campus-${code}-${day}`, day, title, story, tension, choices,
   evidenceIds: code === 'A' ? ['campus-a1'] : code === 'B' ? (day === 30 ? ['campus-b1'] : ['campus-b2', 'campus-b3']) : ['campus-c1', 'campus-c2'],

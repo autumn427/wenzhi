@@ -57,7 +57,7 @@ import {
   X,
 } from '@phosphor-icons/react'
 import { Branch, BranchStatus, Evidence, flattenBranches, programmingCorpusStats, programmingMethodology, questions } from './data'
-import { chooseUniverseFreeAction, chooseUniversePath, chooseUniversePathQuick, createRecalibratedUniverseRuns, createUniverseRuns, createGeneratedUniverseRuns, refreshLegacyEnding, GeneratedFreeAction, NarrativeOverride, simulationStorageKey, StateDelta, UniverseCode, UniverseRun, WorkSampleEvidence } from './simulation'
+import { chooseUniverseFreeAction, chooseUniversePath, chooseUniversePathQuick, createRecalibratedUniverseRuns, createUniverseRuns, createGeneratedUniverseRuns, refreshLegacyEnding, refreshCampusGrowth, GeneratedFreeAction, NarrativeOverride, simulationStorageKey, StateDelta, UniverseCode, UniverseRun, WorkSampleEvidence } from './simulation'
 
 gsap.registerPlugin(useGSAP, Observer)
 
@@ -1454,6 +1454,7 @@ function Home({
   useEffect(() => { if (scene !== 2) setRouteEntered(false) }, [scene])
   const [simulationProfile, setSimulationProfile] = useState<Situation>(initialProfile)
   const [universeRuns, setUniverseRuns] = useState<Record<UniverseCode, UniverseRun>>(() => LIVE_AI_ENABLED ? readUniverseRuns(initialProfile) : createUniverseRuns(judgeDemoSituation))
+  useEffect(() => { setUniverseRuns(runs => ({A:refreshCampusGrowth(runs.A),B:refreshCampusGrowth(runs.B),C:refreshCampusGrowth(runs.C)})) }, [refreshCampusGrowth])
   const careerUniverses = demoCareerUniverses.map(universe => {
     const route = universeRuns[universe.code].route
     return route ? {...universe,title:route.title,fit:'',choice:route.premise,preview:route.premise,future:route.premise,tension:route.opening.tension,action:route.opening.choices[0].label,milestones:[] as string[]} : universe
