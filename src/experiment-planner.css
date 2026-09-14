@@ -1,0 +1,75 @@
+/* Seven-day paper desk, scoped above the legacy reflection styles. */
+.paper-experience .wz-reflect .wz-experiment-card:has(.ep-planner){max-width:1440px;padding:24px;background-color:#f8f5ed;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23938165' opacity='.085' filter='url(%23n)' d='M0 0h160v160H0z'/%3E%3C/svg%3E");border:1px solid #fffdf4;border-radius:18px;box-shadow:0 3px 9px #65543a20;color:#302e29}
+.paper-experience .wz-experiment-card>header[hidden]{display:none}
+.paper-experience .wz-experiment-card .ep-planner{font-family:Georgia,'Noto Serif SC','Songti SC',SimSun,serif}
+.paper-experience .ep-planner .ep-heading{display:grid;grid-template-columns:1.1fr 1.2fr .65fr;gap:30px;align-items:center;padding:0 12px 24px}
+.paper-experience .ep-planner .ep-tag{display:inline-block;background:#eee1c3;padding:3px 12px;border:1px solid #dbc99c;border-radius:3px;color:#876633;font-size:13px;box-shadow:0 2px 3px #87704b15}
+.paper-experience .ep-planner .ep-heading h3{font:600 clamp(24px,2.2vw,36px)/1.35 Georgia,'Noto Serif SC',SimSun,serif;margin:12px 0 4px;letter-spacing:0}
+.paper-experience .ep-planner p{font-size:16px;line-height:1.65;color:#625e55;margin:4px 0}
+.paper-experience .ep-planner .ep-goal{display:flex;align-items:center;gap:16px;padding:18px;border-radius:7px;border:1px solid #fffcf3;box-shadow:0 3px 7px #66523525;background:#f1eadc66}
+.paper-experience .ep-planner .ep-goal>span{font-size:38px;color:#a78c58}
+.paper-experience .ep-planner .ep-goal p{font-size:16px;color:#3d3931}
+.paper-experience .ep-planner .ep-source{align-self:center;font-size:13px;min-width:0}
+.paper-experience .ep-planner .ep-source summary{cursor:pointer;padding:10px 12px;background:#eeeae2;border:1px solid #dcd5c8;border-radius:4px;list-style:none;box-shadow:0 2px 3px #68563815}
+.paper-experience .ep-planner .ep-source summary::after{content:'⌄';float:right}
+.paper-experience .ep-planner .ep-source p{font-size:13px;margin:10px 0}
+.paper-experience .ep-planner .ep-source>small{display:block;margin-top:8px;font:12px/1.5 sans-serif;color:#827b70}
+.paper-experience .ep-planner .ep-journey{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:26px;align-items:center;margin:8px 12px 22px}
+.paper-experience .ep-planner .ep-timeline{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:relative;gap:6px}
+.paper-experience .ep-planner .ep-timeline:before{content:'';position:absolute;top:23px;left:7%;right:7%;height:1px;background:#cec5b6;box-shadow:0 2px 3px #6e573329}
+.paper-experience .ep-planner .ep-timeline button{display:flex;flex-direction:column;gap:12px;background:none;border:0;padding:0;position:relative;box-shadow:none;min-width:0;color:#797165;font-size:14px}
+.paper-experience .ep-planner .ep-timeline button>span{width:46px;height:46px;border-radius:50%;background:#f1ece2;border:1px solid #beb4a3;display:grid;place-items:center;box-shadow:0 3px 4px #6a53351c;font-size:17px}
+.paper-experience .ep-planner .ep-timeline button>b{font-weight:400;white-space:nowrap}
+.paper-experience .ep-planner .ep-timeline .is-recorded>span{background:#d5dcce;color:#315842;border-color:#9aaa98}
+.paper-experience .ep-planner .ep-timeline .is-selected>span{outline:2px solid #2f6e9b;outline-offset:2px;background:#e2eaf0;color:#225983}
+.paper-experience .ep-planner .ep-timeline .is-selected>b{font-weight:700;color:#245b84}
+.paper-experience .ep-planner .ep-progress{border-left:1px solid #dfd6c6;padding-left:26px;display:grid;gap:8px}
+.paper-experience .ep-planner .ep-progress strong{font-size:20px;font-weight:500}
+.paper-experience .ep-planner .ep-progress progress{width:100%;height:8px;border:none;border-radius:6px;overflow:hidden;appearance:none;background:#ddd8cf}
+.paper-experience .ep-planner progress::-webkit-progress-bar{background:#ddd8cf}.paper-experience .ep-planner progress::-webkit-progress-value{background:#507e9a;border-radius:6px}
+.paper-experience .ep-planner .ep-progress small{font:11px/1.5 sans-serif;color:#857e72}
+.paper-experience .ep-planner .ep-workspace{display:grid;grid-template-columns:30% minmax(0,1fr);gap:12px}
+.paper-experience .ep-planner .ep-day-list,.paper-experience .ep-planner .ep-task{background:#fffcf666;border:1px solid #fffdf6;border-radius:12px;box-shadow:0 3px 7px #79624320;min-width:0;padding:20px}
+.paper-experience .ep-planner .ep-day-list{display:flex;flex-direction:column;justify-content:space-between}
+.paper-experience .ep-planner .ep-day-list button{display:grid;grid-template-columns:25px 22px minmax(0,1fr) 48px 48px;gap:10px;text-align:left;align-items:center;border:0;border-bottom:1px solid #ddd4c3;border-radius:0;background:transparent;padding:12px 4px;color:#504b43;min-height:57px;box-shadow:none}
+.paper-experience .ep-planner .ep-day-list button:last-child{border-bottom:0}
+.paper-experience .ep-planner .ep-day-list button.is-selected{background:#dee7edb0;box-shadow:0 0 0 1px #d1dce3;border-radius:8px;color:#225d8d;border-bottom-color:transparent}
+.paper-experience .ep-planner .ep-day-list b{font-size:15px;font-weight:500;white-space:nowrap}.paper-experience .ep-planner .ep-day-list small{font-size:12px;white-space:nowrap}.paper-experience .ep-planner .ep-day-list em{font-size:12px;font-style:normal;text-align:center;color:inherit}
+.paper-experience .ep-planner .ep-file{font:16px/25px serif;width:22px;height:28px;background:#c8d0bb;color:#6b785d;border:1px solid #a5ad95;clip-path:polygon(0 0,70% 0,100% 25%,100% 100%,0 100%);text-align:center;border-radius:3px}.paper-experience .ep-planner .ep-file.tone-2{background:#dcc9a8;color:#a18959;border-color:#b9a17c}.paper-experience .ep-planner .ep-file.tone-0{background:#bfd0dc;color:#527995;border-color:#8aa5b7}
+.paper-experience .ep-planner .ep-task{padding:24px 30px;display:flex;flex-direction:column}
+.paper-experience .ep-planner .ep-task-intro{display:grid;grid-template-columns:minmax(0,1fr) 145px;gap:20px;min-height:162px;align-items:center;padding-bottom:20px}
+.paper-experience .ep-planner .ep-day-tag{display:inline-block;background:#e1e9ef;border:1px solid #d7e1e8;border-radius:7px;padding:5px 14px;color:#387299;font-size:14px}
+.paper-experience .ep-planner .ep-task h4{font:600 clamp(26px,2.6vw,40px)/1.3 Georgia,'Noto Serif SC',SimSun,serif;color:#292824;margin:12px 0 6px}
+.paper-experience .ep-planner .ep-time{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:20px;background:#eee9df;border:1px solid #e3dccd;color:#606158;font-size:14px}
+.paper-experience .ep-planner .ep-note{display:grid;gap:7px;border-top:1px solid #dcd3c2;padding-top:16px;margin:0;flex:1;font-size:16px}
+.paper-experience .ep-planner .ep-note>span{font-weight:600}
+.paper-experience .ep-planner .ep-note textarea{min-height:110px;resize:vertical;padding:10px 16px;line-height:30px;font-size:14px;border:1px solid #d8cfbd;border-radius:7px;background:repeating-linear-gradient(transparent 0 29px,#bab09e55 29px 30px);background-origin:content-box;color:#423d34;box-shadow:inset 0 2px 5px #816c4510}
+.paper-experience .ep-planner .ep-note>small{font:11px/1.3 sans-serif;text-align:right;color:#928774}
+.paper-experience .ep-planner .ep-actions{display:flex;justify-content:center;gap:22px;margin-top:10px}
+.paper-experience .ep-planner .ep-actions button{min-width:170px;padding:10px 24px;font-size:17px;border-radius:8px;box-shadow:0 3px 5px #73604420;background:#f8f3e8}
+.paper-experience .ep-planner .ep-actions button:first-child{color:white;background:#4c82a5;border-color:#3c7293;box-shadow:inset 0 1px 1px #ffffff55,0 3px 5px #73604430}
+.paper-experience .ep-planner .ep-notebook{height:120px;position:relative;transform:rotate(13deg);filter:drop-shadow(0 6px 5px #5a47252e)}
+.paper-experience .ep-planner .ep-notebook i{position:absolute;left:8px;top:0;width:62px;height:108px;background:repeating-linear-gradient(#f5ecd9 0 15px,#d6c7a7 16px,#f5ecd9 18px);border:5px solid #faf4e5;border-radius:5px 0 0 5px;transform:skewY(5deg)}
+.paper-experience .ep-planner .ep-notebook i+i{left:77px;transform:skewY(-5deg);border-radius:0 5px 5px 0;background:#f4ead4}
+.paper-experience .ep-planner .ep-notebook b{position:absolute;left:97px;top:17px;height:105px;width:7px;background:linear-gradient(90deg,#af9465,#e7d7b3,#b6a076);transform:rotate(14deg);border-radius:80% 80% 2px 2px}
+.paper-experience .ep-planner .ep-criteria{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:18px 12px 0;gap:22px;margin-top:16px;border-top:1px solid #e2d8c7}
+.paper-experience .ep-planner .ep-criteria>div{display:flex;align-items:flex-start;gap:16px;border-right:1px solid #e0d7c6;padding-right:16px}.paper-experience .ep-planner .ep-criteria>div:last-child{border:0}
+.paper-experience .ep-planner .ep-criteria>div>span{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#ced2bf;color:#667854;font-size:28px}.paper-experience .ep-planner .ep-criteria>div:nth-child(2)>span{background:#e2cfaa;color:#a68443}.paper-experience .ep-planner .ep-criteria>div:nth-child(3)>span{background:#c5d5df;color:#43779b}
+.paper-experience .ep-planner .ep-criteria b{font-size:15px;color:#53644f}.paper-experience .ep-planner .ep-criteria p{font-size:12px;margin-top:6px;line-height:1.7}
+@media(max-width:1100px){.paper-experience .ep-planner .ep-heading{grid-template-columns:1fr 1fr}.paper-experience .ep-planner .ep-source{grid-column:1/-1}.paper-experience .ep-planner .ep-workspace{grid-template-columns:34% minmax(0,1fr)}.paper-experience .ep-planner .ep-day-list{padding:12px}.paper-experience .ep-planner .ep-day-list button{grid-template-columns:20px 18px minmax(0,1fr) 40px;gap:6px}.paper-experience .ep-planner .ep-day-list em{grid-column:3/5;text-align:right}.paper-experience .ep-planner .ep-task-intro{grid-template-columns:1fr}.paper-experience .ep-planner .ep-notebook{display:none}}
+@media(max-width:700px){.paper-experience .wz-reflect .wz-experiment-card:has(.ep-planner){padding:16px}.paper-experience .ep-planner .ep-heading{grid-template-columns:1fr;gap:14px;padding:0}.paper-experience .ep-planner .ep-heading h3{font-size:26px}.paper-experience .ep-planner .ep-journey{display:block;margin:22px 0}.paper-experience .ep-planner .ep-timeline button>b{font-size:10px}.paper-experience .ep-planner .ep-timeline button>span{width:30px;height:30px;font-size:13px}.paper-experience .ep-planner .ep-timeline:before{top:15px}.paper-experience .ep-planner .ep-progress{margin-top:20px;padding:0;border:0}.paper-experience .ep-planner .ep-workspace{grid-template-columns:1fr}.paper-experience .ep-planner .ep-day-list{display:none}.paper-experience .ep-planner .ep-task{padding:18px}.paper-experience .ep-planner .ep-task-intro{min-height:0}.paper-experience .ep-planner .ep-actions{gap:10px}.paper-experience .ep-planner .ep-actions button{min-width:0;flex:1;padding:10px;font-size:15px}.paper-experience .ep-planner .ep-criteria{grid-template-columns:1fr;padding:16px 0 0;gap:16px}.paper-experience .ep-planner .ep-criteria>div{border:0}.paper-experience .ep-planner p{font-size:15px}}
+.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan{min-height:0;padding:10px 0 0;margin:0 auto 12px;display:flex;align-items:center;gap:14px;max-width:1440px}
+.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan h2{font-size:22px;line-height:1.4;margin:0}
+.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan>p,.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan>.paper-accent,.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan>img{display:none}
+.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan .paper-eyebrow{font-size:12px;margin:0}
+.paper-experience .ep-planner .ep-task{scroll-margin-top:18px}
+.paper-experience .ep-planner .ep-task h4:focus{outline:none}
+.paper-experience .ep-planner .ep-status-counts{font-size:12px;color:#776c5a;white-space:nowrap}
+.paper-experience .ep-planner .ep-timeline .is-skipped>span{background:#e6dfd5;border-style:dashed;color:#857967}
+.paper-experience .wz-experiment-card .ep-evidence-review{padding:16px;background:#f6f1e7;border:1px solid #ddd1bc;border-radius:8px;margin-top:18px}
+.paper-experience .wz-experiment-card .ep-evidence-review h5{font-size:17px;margin:0}
+.paper-experience .wz-experiment-card .ep-evidence-review ol{padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.paper-experience .wz-experiment-card .ep-evidence-review li{padding:12px;background:#fffaf0;border-radius:5px;overflow-wrap:anywhere}
+.paper-experience .wz-experiment-card .ep-evidence-review li b{font-size:13px}
+.paper-experience .wz-experiment-card .ep-evidence-review li p{font-size:13px;margin:5px 0}
+@media(max-width:700px){.paper-experience .wz-reflect .paper-reflection-heading.has-action-plan h2{font-size:18px}.paper-experience .wz-experiment-card .ep-evidence-review ol{grid-template-columns:1fr}}

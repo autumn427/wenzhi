@@ -1,0 +1,19 @@
+.living-paper { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.living-paper-camera, .living-paper-base, .living-paper-character, .living-paper-foreground, .living-paper-light, .living-paper-glow { position: absolute; inset: 0; }
+.living-paper-base, .living-paper-character, .living-paper-foreground { background: var(--scene-image) center / cover no-repeat; }
+.living-paper-character {
+  /* A softly feathered local patch keeps the illustration intact, with subtle breathing. */
+  mask-image: radial-gradient(ellipse 9% 17% at var(--actor-x) var(--actor-y), black 55%, transparent 100%);
+  transform-origin: var(--actor-x) calc(var(--actor-y) + 12%);
+}
+.scene-a { --actor-x: 47%; --actor-y: 47%; --world-glow: 165, 210, 255; }
+.scene-b { --actor-x: 61%; --actor-y: 53%; --world-glow: 255, 213, 134; }
+.scene-c { --actor-x: 50%; --actor-y: 65%; --world-glow: 224, 238, 163; }
+.living-paper-foreground { mask-image: radial-gradient(ellipse 28% 35% at 94% 96%, black 25%, transparent 95%); transform-origin: 94% 100%; }
+.living-paper-light { background: linear-gradient(115deg, transparent 32%, rgba(255, 249, 223, .3) 48%, transparent 66%); mix-blend-mode: soft-light; opacity: .12; }
+.living-paper-glow { background: radial-gradient(ellipse at 62% 35%, rgba(var(--world-glow), .35), transparent 42%); mix-blend-mode: screen; opacity: .15; }
+.scene-a .living-paper-glow { background: repeating-linear-gradient(0deg, transparent 0 64px, rgba(var(--world-glow), .12) 65px 66px, transparent 67px 100px); mask-image: radial-gradient(ellipse at 61% 45%, black, transparent 52%); }
+.scene-c .living-paper-light { background: repeating-linear-gradient(115deg, transparent 0 12%, rgba(245, 255, 222, .2) 15%, transparent 20%); }
+.wz-expanded-nav .wz-world-motion { min-height: 36px; padding: 8px 12px; color: #3e463e; background: #f6efde; border: 1px solid #bfb59e; font-size: 12px; box-shadow: 2px 3px 0 #00000012; }
+.wz-world-motion:focus-visible { outline: 3px solid #1677ff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .wz-world-motion { display: none !important; } }

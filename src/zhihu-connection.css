@@ -1,0 +1,7 @@
+.zhihu-connection{position:relative;margin-left:auto;color:#665640;font:14px/1.5 system-ui,sans-serif;z-index:50}
+.zhihu-connection summary{cursor:pointer;padding:8px 12px;white-space:nowrap;list-style:none;border:1px solid #d5c7b2;border-radius:6px;background:#fbf7ee}
+.zhihu-connection summary:focus-visible,.zhihu-connection button:focus-visible{outline:2px solid #2675af;outline-offset:3px}
+.zhihu-connection-panel{position:absolute;right:0;top:calc(100% + 10px);width:min(310px,calc(100vw - 40px));box-sizing:border-box;padding:18px;background:#fffaf0;border:1px solid #d5c7b2;border-radius:10px;box-shadow:0 8px 24px #59432926}
+.zhihu-connection-panel p{font:14px/1.6 system-ui,sans-serif;margin:10px 0;color:#665640}
+.zhihu-connection-panel button{font:14px/1.4 system-ui,sans-serif;padding:10px 16px;border:0;border-radius:6px;color:white;background:#24669b;cursor:pointer;white-space:nowrap}
+.zhihu-connection-panel small{display:block;font-size:12px;margin-top:10px}

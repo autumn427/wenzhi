@@ -1,0 +1,172 @@
+{
+  "checkedAt": "2026-09-14T07:25:03.205Z",
+  "deployments": {
+    "deployments": [
+      {
+        "id": "93ee7d89-5907-449e-b046-5cbb267343c4",
+        "source": "api",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/message": "Route API to authenticated zjc Node backend; pr...",
+          "workers/triggered_by": "upload"
+        },
+        "versions": [
+          {
+            "version_id": "1bd490a1-7f6a-4cf2-aec8-f66382cc1d7c",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-14T06:59:27.098113Z"
+      },
+      {
+        "id": "4a957974-12cc-493f-ba56-575236afa567",
+        "source": "api",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/triggered_by": "secret"
+        },
+        "versions": [
+          {
+            "version_id": "623ba158-c704-403e-8731-f70dcb8be9be",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-14T06:37:33.010432Z"
+      },
+      {
+        "id": "fb953cee-e8ad-43a7-b0c3-9d38ccb74ae7",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "9fce8108-4128-4393-8714-6467cbef908b",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-14T03:05:18.260358Z"
+      },
+      {
+        "id": "869c2b41-12f5-4061-b3db-9b1b991e2fa6",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "bcb23a80-60ec-45ce-b1af-37b5c4cfd97d",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-14T01:17:18.364655Z"
+      },
+      {
+        "id": "eaf0125c-17f5-4e6d-8906-4c79b488a551",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "3030dac8-aa3d-493b-844f-f3f350579b02",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-14T01:00:45.687867Z"
+      },
+      {
+        "id": "d1e6c53b-c8d6-447c-8a34-7037ffe678b8",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "0ceaae17-3a82-433e-ab52-693ea41c287c",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-13T23:40:53.79888Z"
+      },
+      {
+        "id": "d147b901-1527-4915-a2d3-38bf70224bd2",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/message": "Unify action submission, atomic validation, one bounded structural repair, and history continuity",
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "b094763c-b3bc-490e-b3d8-21d2a2098308",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-13T22:13:10.144653Z"
+      },
+      {
+        "id": "5ace479b-cf15-437c-a4e7-dd61bf71c640",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/message": "Align decision prompt with current story tension and label previous choice in reality letters",
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "afd2ffc6-47d7-40b8-9984-3051aec4827c",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-13T21:58:19.149894Z"
+      },
+      {
+        "id": "28d76481-49e8-4810-a908-658769372223",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/message": "Connect reality letters to current universe and choice; preserve progress and clarify evidence",
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "7bc6d17f-6e86-49a2-aed2-df7a330c5875",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-13T21:39:20.647687Z"
+      },
+      {
+        "id": "58a694b1-0e11-4d4c-bf0c-e7604c85234d",
+        "source": "wrangler",
+        "strategy": "percentage",
+        "author_email": "759323281@qq.com",
+        "annotations": {
+          "workers/message": "Enable relay AI for personalized routes, narrative and reflection",
+          "workers/triggered_by": "deployment"
+        },
+        "versions": [
+          {
+            "version_id": "825e5e86-c604-42a7-a037-61d9a0be3026",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-09-13T20:52:07.449319Z"
+      }
+    ]
+  }
+}

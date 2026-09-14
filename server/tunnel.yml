@@ -1,0 +1,9 @@
+tunnel: ebc83c2f-ef1a-4ea5-b58b-895a2ea03491
+credentials-file: /tos-mlp-zgci/wenzhi-backend/.runtime/tunnel.json
+metrics: 127.0.0.1:30121
+protocol: http2
+ingress:
+  - hostname: wenzhi-origin.autumn427.xyz
+    path: /api/.*
+    service: http://127.0.0.1:30120
+  - service: http_status:404

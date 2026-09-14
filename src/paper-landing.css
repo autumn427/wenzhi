@@ -1,0 +1,102 @@
+/* Opening scene: a small paper theatre built around the existing panorama. */
+.paper-landing { --landing-paper: #faf5eb; --landing-ink: #28251f; }
+.paper-landing .paper-opening { isolation: isolate; perspective: 1100px; }
+.paper-landing .paper-opening-art { z-index: 0; overflow: hidden; background-color: var(--landing-paper); }
+.paper-landing .paper-opening-art::before,
+.paper-landing .paper-opening-art::after { content: ''; position: absolute; pointer-events: none; }
+.paper-landing .paper-opening-art::before {
+  inset: 0; z-index: 1;
+  background: linear-gradient(90deg, rgba(250,245,235,.78) 0%, rgba(250,245,235,.36) 33%, rgba(250,245,235,0) 66%), linear-gradient(0deg, rgba(58,41,22,.16), transparent 26%);
+  mix-blend-mode: multiply;
+}
+.paper-landing .paper-opening-art::after {
+  inset: 0; z-index: 5; opacity: .12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.26'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.paper-landing .paper-opening-layer { position: absolute; display: block; pointer-events: none; }
+.paper-landing .layer-haze { inset: 4% 42% 8% 2%; z-index: 2; background: rgba(255,251,242,.38); clip-path: polygon(0 8%, 86% 0, 100% 82%, 18% 100%); filter: blur(20px); transform: rotate(-3deg); }
+.paper-landing .layer-moon { z-index: 3; right: 10%; top: 14%; width: clamp(54px, 6vw, 108px); aspect-ratio: 1; border-radius: 50%; background: #f7edcf; box-shadow: -14px 17px 0 rgba(125,93,46,.12), inset -10px -8px 0 rgba(207,177,118,.2); opacity: .72; }
+.paper-landing .layer-ribbon { z-index: 4; left: 42%; bottom: -9%; width: 58%; height: 31%; background: rgba(237,218,184,.48); clip-path: polygon(0 33%, 38% 0, 100% 22%, 79% 100%, 14% 83%); transform: rotate(-6deg); filter: drop-shadow(8px 13px 0 rgba(99,73,42,.12)); }
+.paper-landing .layer-grain { z-index: 6; inset: 0; border: 1px solid rgba(96,72,40,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.paper-landing .paper-opening-copy { z-index: 8; }
+.paper-landing .paper-scene-kicker { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 24px; color: #72634f; font-size: 14px; letter-spacing: .12em; }
+.paper-landing .paper-scene-kicker i { display: inline-block; width: 21px; height: 13px; border-top: 2px solid #4f775e; border-bottom: 2px solid #c48a42; transform: skewX(-26deg); }
+.paper-landing .paper-opening h1 { text-wrap: balance; text-shadow: 0 2px 0 rgba(255,255,255,.5); }
+.paper-landing .paper-opening-copy > p { max-width: 24em; color: #544b40; }
+.paper-landing .paper-opening-frame { position: absolute; z-index: 9; inset: 24px 30px; pointer-events: none; border: 1px solid rgba(114,93,64,.22); }
+.paper-landing .paper-frame-corner { position: absolute; width: 30px; height: 30px; border-color: rgba(103,79,44,.55); border-style: solid; }
+.paper-landing .corner-tl { left: -1px; top: -1px; border-width: 2px 0 0 2px; }
+.paper-landing .corner-br { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; }
+.paper-landing .paper-frame-stamp { position: absolute; right: 17px; top: 15px; color: rgba(84,69,48,.72); font: 600 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .15em; transform: rotate(90deg) translateX(100%); transform-origin: top right; }
+.paper-landing .paper-source { z-index: 9; }
+.paper-landing .paper-scroll { z-index: 9; box-shadow: 0 3px 0 rgba(101,79,47,.13); }
+
+/* Route cards read like three hinged paper doors. */
+.paper-landing .paper-route-list { align-items: stretch; }
+.paper-landing .paper-route { position: relative; min-height: 300px; display: grid; grid-template-rows: 128px 1fr; gap: 22px; padding: 18px 20px 24px; border: 1px solid #d5c7b2; border-top: 1px solid #b5aa97; background: rgba(255,251,243,.63); box-shadow: 7px 9px 0 rgba(99,75,43,.1); overflow: hidden; transform: rotate(var(--route-tilt, 0deg)); transition: transform .3s ease, box-shadow .3s ease, background .3s ease; }
+.paper-landing .paper-route:nth-child(1) { --route-tilt: -1.2deg; }
+.paper-landing .paper-route:nth-child(2) { --route-tilt: .8deg; }
+.paper-landing .paper-route:nth-child(3) { --route-tilt: -0.4deg; }
+.paper-landing .paper-route::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.5), transparent 40%); }
+.paper-landing .paper-route:hover { transform: translateY(-7px) rotate(0deg); box-shadow: 9px 16px 0 rgba(99,75,43,.14); background: #fffaf1; }
+.paper-landing .paper-route-door { position: relative; height: 128px; overflow: hidden; border: 1px solid rgba(120,91,52,.22); background: #e6dccb; box-shadow: inset 0 -10px 18px rgba(97,70,37,.13); }
+.paper-landing .paper-route-door::before { content: ''; position: absolute; inset: 12px 18px -20px; background: var(--route-door, #9bb6ca); clip-path: polygon(16% 12%, 89% 0, 100% 85%, 9% 100%, 0 30%); box-shadow: 8px 9px 0 rgba(91,69,41,.16); }
+.paper-landing .paper-route-door::after { content: ''; position: absolute; left: 14px; right: 14px; top: 20px; height: 1px; background: rgba(83,64,40,.3); transform: rotate(-7deg); box-shadow: 0 26px 0 rgba(83,64,40,.16), 8px 52px 0 rgba(83,64,40,.13); }
+.paper-landing .paper-route.blue { --route-door: #9eb6c4; }
+.paper-landing .paper-route.amber { --route-door: #d5b17b; }
+.paper-landing .paper-route.green { --route-door: #9ab39b; }
+.paper-landing .paper-route-icon { position: absolute; z-index: 2; right: 25px; top: 31px; width: 55px; height: 55px; border: 2px solid rgba(69,58,42,.48); border-radius: 50%; background: rgba(255,249,237,.57); box-shadow: 3px 4px 0 rgba(76,57,34,.15); }
+.paper-landing .icon-fold::before { content: ''; position: absolute; left: 14px; top: 12px; width: 22px; height: 26px; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: skewY(-26deg) rotate(-28deg); color: #315f80; }
+.paper-landing .icon-spark::before { content: '✦'; position: absolute; inset: 4px 0 0; color: #966326; font-size: 35px; text-align: center; }
+.paper-landing .icon-leaf::before { content: ''; position: absolute; left: 17px; top: 13px; width: 20px; height: 29px; border: 2px solid #426443; border-radius: 100% 0 100% 0; transform: rotate(35deg); }
+.paper-landing .paper-route-copy { position: relative; z-index: 2; }
+.paper-landing .paper-route-index { display: inline-grid; place-items: center; width: 29px; height: 29px; border: 1px solid currentColor; border-radius: 50%; font: 600 15px/1 ui-monospace, monospace; }
+.paper-landing .paper-route h3 { margin: 15px 0 12px; }
+.paper-landing .paper-route p { margin: 0; }
+
+@media (max-width: 760px) {
+  .paper-landing .paper-opening-frame { inset: 14px 16px; }
+  .paper-landing .paper-frame-stamp { display: none; }
+  .paper-landing .paper-scene-kicker { margin-bottom: 16px; font-size: 12px; }
+  .paper-landing .paper-opening-art { background-position: 68% bottom; }
+  .paper-landing .layer-moon { right: 12%; top: 16%; width: 58px; }
+  .paper-landing .layer-ribbon { left: 18%; width: 92%; height: 30%; }
+  .paper-landing .paper-route { min-height: 274px; grid-template-rows: 104px 1fr; padding: 14px 16px 20px; }
+  .paper-landing .paper-route-door { height: 104px; }
+  .paper-landing .paper-route-icon { right: 22px; top: 24px; transform: scale(.82); transform-origin: top right; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .paper-landing .paper-route { transition: none; }
+  .paper-landing .paper-route:hover { transform: rotate(var(--route-tilt, 0deg)); }
+}
+
+/* Route cards now use the same miniature set photography as the main paper theatre. */
+.paper-landing .paper-route-door { isolation: isolate; border-color: rgba(104,78,44,.28); background: #ded1bd; }
+.paper-landing .paper-route-door > img { position: absolute; z-index: 0; inset: -9% -7%; width: 114%; height: 124%; object-fit: cover; filter: saturate(.82) contrast(.96) sepia(.06); transition: transform .65s cubic-bezier(.2,.75,.2,1), filter .3s ease; }
+.paper-landing .paper-route:hover .paper-route-door > img { transform: scale(1.06); filter: saturate(.94) contrast(1); }
+.paper-landing .paper-route-door::before { z-index: 1; inset: 8px 12px -18px; background: linear-gradient(165deg, color-mix(in srgb,var(--route-door) 40%,transparent), transparent 64%); opacity: .72; box-shadow: 8px 9px 0 rgba(91,69,41,.12); }
+.paper-landing .paper-route-door::after { z-index: 3; left: 12px; right: 12px; top: 17px; height: 1px; background: rgba(83,64,40,.27); transform: rotate(-7deg); box-shadow: 0 26px 0 rgba(83,64,40,.14), 8px 52px 0 rgba(83,64,40,.11); }
+.paper-landing .paper-route-cut { position: absolute; z-index: 2; display: block; pointer-events: none; filter: drop-shadow(4px 5px 0 rgba(75,54,30,.15)); }
+.paper-landing .paper-route-cut.cut-back { right: -10%; bottom: -35%; width: 66%; height: 66%; background: color-mix(in srgb,var(--route-door) 60%,#fff8e9); clip-path: polygon(15% 13%,100% 0,84% 100%,0 78%); opacity: .4; }
+.paper-landing .paper-route-cut.cut-front { left: -11%; bottom: -40%; width: 54%; height: 52%; background: rgba(255,249,237,.53); clip-path: polygon(0 16%,78% 0,100% 100%,8% 82%); opacity: .7; }
+.paper-landing .paper-route-icon { z-index: 5; right: 18px; top: 25px; width: 62px; height: 62px; border: 0; border-radius: 0; background: #f8edda; clip-path: polygon(8% 0,100% 11%,88% 100%,0 86%); box-shadow: none; filter: drop-shadow(4px 5px 0 rgba(76,57,34,.2)); transform: rotate(4deg); }
+.paper-landing .paper-route-icon::before,.paper-landing .paper-route-icon::after { content: ''; position: absolute; box-sizing: border-box; pointer-events: none; }
+.paper-landing .paper-route-icon::before { z-index: -2; inset: 4px 4px 0 6px; background: #d8c3a0; clip-path: polygon(0 10%,89% 0,100% 84%,12% 100%); transform: rotate(-7deg); }
+.paper-landing .paper-route-icon::after { z-index: -1; inset: 8px; border: 1px solid rgba(108,79,43,.26); clip-path: polygon(0 8%,100% 0,92% 100%,8% 92%); }
+.paper-landing .paper-route-icon > i { position: absolute; z-index: 2; display: block; box-sizing: border-box; }
+.paper-landing .icon-fold > i:nth-child(1) { left: 18px; top: 17px; width: 25px; height: 29px; border-left: 3px solid #315f80; border-bottom: 3px solid #315f80; transform: skewY(-24deg) rotate(-28deg); }
+.paper-landing .icon-fold > i:nth-child(2) { left: 30px; top: 15px; width: 12px; height: 20px; border-right: 3px solid #5e89a2; transform: rotate(35deg); }
+.paper-landing .icon-fold > i:nth-child(3) { left: 14px; top: 38px; width: 7px; height: 7px; border-radius: 50%; background: #d77c64; }
+.paper-landing .icon-spark > i:nth-child(1) { left: 23px; top: 14px; width: 18px; height: 30px; background: #a36c24; clip-path: polygon(50% 0,64% 34%,100% 50%,64% 63%,50% 100%,35% 63%,0 50%,35% 34%); }
+.paper-landing .icon-spark > i:nth-child(2) { left: 12px; top: 40px; width: 10px; height: 10px; background: #d3a559; clip-path: polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%); }
+.paper-landing .icon-spark > i:nth-child(3) { right: 10px; top: 12px; width: 7px; height: 7px; border-radius: 50%; background: #d77c64; }
+.paper-landing .icon-leaf > i:nth-child(1) { left: 20px; top: 15px; width: 26px; height: 34px; border: 3px solid #426443; border-radius: 100% 0 100% 0; transform: rotate(35deg); }
+.paper-landing .icon-leaf > i:nth-child(2) { left: 30px; top: 19px; width: 2px; height: 28px; background: #6c8c65; transform: rotate(35deg); }
+.paper-landing .icon-leaf > i:nth-child(3) { left: 12px; top: 42px; width: 8px; height: 8px; border-radius: 50%; background: #d77c64; }
+.paper-landing .paper-route-scene-label { position: absolute; z-index: 6; left: 12px; bottom: 9px; padding: 4px 7px; color: #fffaf0; background: rgba(65,48,28,.54); font: 700 10px/1.2 ui-monospace,monospace; letter-spacing: .08em; text-shadow: 0 1px 1px rgba(0,0,0,.2); transform: rotate(-2deg); }
+@media (max-width:760px) {
+  .paper-landing .paper-route-icon { right: 15px; top: 19px; transform: scale(.88) rotate(4deg); transform-origin: top right; }
+  .paper-landing .paper-route-scene-label { font-size: 9px; }
+}
+@media (prefers-reduced-motion:reduce) { .paper-landing .paper-route-door > img { transition: none; } }

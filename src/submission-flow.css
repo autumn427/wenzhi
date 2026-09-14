@@ -1,0 +1,47 @@
+/* Shared by the lightweight preset demo and the full AI experience. */
+.paper-experience .wz-reflect .wz-experiment-card {
+  width:100%; min-width:0; max-width:1180px; margin:24px auto 32px; padding:24px;
+  position:relative; box-sizing:border-box; border:1px solid #dfcfb5; border-radius:5px 12px 7px 10px;
+  color:#493e30; background:#fff9ed; box-shadow:0 7px 18px #73592c12; overflow:hidden;
+}
+.paper-experience .wz-reflect .wz-experiment-card::before,.paper-experience .wz-reflect .wz-experiment-card::after {content:none}
+.paper-experience .wz-experiment-card>header {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:0 0 16px;border-bottom:1px solid #dfcfb5}
+.paper-experience .wz-experiment-card>header span {font-size:11px;letter-spacing:.1em;color:#8d785b}
+.paper-experience .wz-experiment-card>header h3 {font-size:clamp(22px,2.3vw,30px);line-height:1.4;margin:6px 0 0}
+.paper-experience .wz-experiment-card button {font:inherit;font-size:14px;line-height:1.5;cursor:pointer;border:1px solid #cbb89b;border-radius:5px;padding:9px 14px;background:#fffaf1;color:#564a39;display:inline-flex;gap:6px;align-items:center;justify-content:center}
+.paper-experience .wz-experiment-card button:disabled {opacity:.55;cursor:default}
+.paper-experience .wz-experiment-card button:focus-visible {outline:2px solid #176bab;outline-offset:3px}
+.paper-experience .wz-experiment-card .wz-ticket-copy {background:#176bab;color:#fff;border-color:#176bab}
+.paper-experience .wz-experiment-card .wz-ticket-number {display:none}
+.paper-experience .wz-experiment-card .wz-experiment-brief {display:block;padding:18px 0}
+.paper-experience .wz-experiment-card small {font-size:12px;line-height:1.6;color:#85765e}
+.paper-experience .wz-experiment-card h4 {font-size:20px;line-height:1.5;margin:5px 0 10px}
+.paper-experience .wz-experiment-card p {font-size:15px;line-height:1.8;margin:8px 0;overflow-wrap:anywhere}
+.paper-experience .wz-experiment-card blockquote {font-size:13px;line-height:1.8;margin:12px 0;padding:10px 14px;border-left:2px solid #b4a184;color:#817158}
+.paper-experience .wz-experiment-card .wz-ticket-seals {display:flex;align-items:center;gap:8px;margin-top:12px}
+.paper-experience .wz-experiment-card .wz-ticket-seals span {display:inline-grid;place-items:center;width:26px;height:26px;border:1px solid #b6ab91;border-radius:50%;font-size:12px;color:#537261}
+.paper-experience .wz-experiment-card .wz-experiment-progress {padding:12px 0;border-block:1px dashed #dbc9aa}
+.paper-experience .wz-experiment-card .wz-experiment-progress>div {display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.paper-experience .wz-experiment-card .wz-experiment-progress>i {display:block;height:4px;background:#e9dfce;margin:10px 0;border-radius:3px}
+.paper-experience .wz-experiment-card .wz-experiment-progress>i>span {display:block;height:100%;background:#60876c}
+.paper-experience .wz-reflect .wz-experiment-card ol.experiment-receipts {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;gap:12px;list-style:none;padding:18px 0;margin:0;overflow:visible}
+.paper-experience .wz-experiment-card .experiment-receipts>li {display:flex;flex-direction:column;min-width:0;flex:auto;border:1px solid #dfcfb5;border-radius:3px;background:#f9f1e1;box-shadow:2px 3px 0 #d7c29d35;transform:none}
+.paper-experience .wz-experiment-card .experiment-receipts>li::before,.paper-experience .wz-experiment-card .experiment-receipts>li::after {content:none}
+.paper-experience .wz-experiment-card .experiment-receipt-body {display:grid;gap:10px;padding:14px;flex:1}
+.paper-experience .wz-experiment-card .experiment-receipt-body>b {font-size:12px;color:#8e7958}
+.paper-experience .wz-experiment-card .experiment-receipt-body>span {font-size:14px;line-height:1.7}
+.paper-experience .wz-experiment-card .experiment-receipt-stub {padding:10px;border-top:1px dashed #d1bfa3}
+.paper-experience .wz-experiment-card .receipt-status {display:block;margin-bottom:6px}
+.paper-experience .wz-experiment-card .wz-day-checkin {display:flex;gap:6px}
+.paper-experience .wz-experiment-card .wz-day-checkin button {flex:1;padding:6px;font-size:12px}
+.paper-experience .wz-experiment-card .wz-day-checkin .active {background:#e3eddd;border-color:#91a181;color:#345d3c}
+.paper-experience .wz-experiment-card .wz-experiment-criteria {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:16px 0 0;border-top:1px solid #dfcfb5}
+.paper-experience .wz-experiment-card .wz-experiment-criteria small,.paper-experience .wz-experiment-card .wz-experiment-criteria strong {display:block}
+.paper-experience .wz-experiment-card .wz-experiment-criteria strong {font-size:14px;line-height:1.7;font-weight:500;margin-top:6px}
+.paper-experience .wz-experiment-card .wz-experiment-feedback {margin-top:22px;padding-top:18px;border-top:1px solid #dfcfb5}
+.paper-experience .wz-experiment-card .wz-feedback-results {display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.paper-experience .wz-experiment-card .wz-experiment-feedback label {display:grid;gap:8px;margin:12px 0}
+.paper-experience .wz-experiment-card textarea {box-sizing:border-box;width:100%;min-height:90px;padding:12px;font:inherit;font-size:15px;background:#fffdf7;border:1px solid #cab89c;border-radius:5px}
+.paper-experience .wz-reflect .wz-debate-locked button {font:inherit;font-size:14px;padding:10px 14px;border:1px solid #cbb89b;border-radius:5px;background:#fff9ee;color:#5d503d;cursor:pointer}
+@media(max-width:800px){.paper-experience .wz-reflect .wz-experiment-card ol.experiment-receipts{grid-template-columns:repeat(2,minmax(0,1fr))}.paper-experience .wz-experiment-card .wz-experiment-criteria{grid-template-columns:1fr}}
+@media(max-width:480px){.paper-experience .wz-reflect .wz-experiment-card{padding:16px}.paper-experience .wz-reflect .wz-experiment-card ol.experiment-receipts{grid-template-columns:1fr}.paper-experience .wz-experiment-card>header{align-items:flex-start}}

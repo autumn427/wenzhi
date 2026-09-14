@@ -1,0 +1,12 @@
+{
+  "d1_databases": [
+    {
+      "database_name": "wenzhi-contributions",
+      "binding": "DB",
+      "migrations_dir": "knowledge-migrations",
+      "database_id": "47825a87-ccc9-46e9-b518-13869599c2e6"
+    }
+  ],
+  "name": "wenzhi",
+  "account_id": "96b0fc65bb6cbc58cd7cebdd69a97443"
+}

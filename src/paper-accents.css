@@ -1,0 +1,24 @@
+.paper-accent { --art-x: 0px; --art-y: 0px; --art-turn: 0deg; pointer-events: none; width: 220px; opacity: 0; transform: translateY(12px); transition: opacity .65s ease, transform .65s ease; }
+.paper-accent.is-visible { opacity: 1; transform: translateY(0); }
+.paper-accent img { display: block; width: 100%; height: auto; object-fit: contain; transform: translate(var(--art-x),var(--art-y)) rotate(var(--art-turn)); transition: transform .25s ease-out; }
+.paper-experience .paper-profile { position: relative; }
+.accent-profile { position: absolute; top: 100px; right: 0; width: 260px; }
+.paper-experience .paper-profile h2 { padding-right: 270px; }
+.paper-experience .journey-ending > header { display: flow-root; }
+.accent-ending { float: right; width: 175px; margin: 0 0 14px 24px; }
+.paper-experience .paper-reflection-heading { position: relative; padding-right: 280px; box-sizing: border-box; }
+.accent-reflection { position: absolute; right: 0; top: 0; width: 260px; }
+.accent-waiting { width: 200px; margin: 0 auto 18px; }
+.paper-experience .route-generation { text-align: center; }
+.accent-letter { width: 90px; flex: 0 0 90px; }
+.paper-accent.is-waiting.is-visible img { animation: paper-accent-breathe 3.2s ease-in-out infinite; }
+@keyframes paper-accent-breathe { 0%,100% {transform: translateY(0) rotate(-1deg)} 50% {transform: translateY(-6px) rotate(1deg)} }
+@media(max-width:1000px) { .accent-profile {width:200px;top:115px;} .paper-experience .paper-profile h2 {padding-right:215px;} }
+@media(max-width:700px) {
+ .accent-profile {width:100px;top:95px;} .paper-experience .paper-profile h2 {padding-right:105px;font-size:clamp(27px,6vw,38px);}
+ .accent-reflection {width:84px;top:0;} .paper-experience .paper-reflection-heading {padding-right:0;}
+ .accent-ending {width:105px;margin-left:12px;}
+ .accent-letter {width:64px;flex-basis:64px;}
+}
+@media(prefers-reduced-motion:reduce) { .paper-accent,.paper-accent.is-visible {opacity:1;transform:none;transition:none;} .paper-accent img,.paper-accent.is-waiting.is-visible img {animation:none;transform:none;transition:none;} }
+.accent-profile { mix-blend-mode: multiply; }

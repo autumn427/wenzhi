@@ -1,0 +1,17 @@
+{
+  "id": "93ee7d89-5907-449e-b046-5cbb267343c4",
+  "source": "api",
+  "strategy": "percentage",
+  "author_email": "759323281@qq.com",
+  "annotations": {
+    "workers/message": "Route API to authenticated zjc Node backend; pr...",
+    "workers/triggered_by": "upload"
+  },
+  "versions": [
+    {
+      "version_id": "1bd490a1-7f6a-4cf2-aec8-f66382cc1d7c",
+      "percentage": 100
+    }
+  ],
+  "created_on": "2026-09-14T06:59:27.098113Z"
+}

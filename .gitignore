@@ -1,0 +1,10 @@
+.dev.vars
+.wrangler
+.wrangler-logs
+dist
+node_modules
+server-build
+.runtime
+server.env
+server/*.env
+

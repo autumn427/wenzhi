@@ -1,0 +1,41 @@
+{
+  "name": "wenzhi-knowledge-tree",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:cloudflare": "npm run build && wrangler dev",
+    "build": "vite build",
+    "build:server": "node scripts/build-node-server.mjs",
+    "test:server": "node --test scripts/test-node-server.mjs",
+    "start:server": "node server-build/server.mjs",
+    "preview": "vite preview",
+    "lint": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.worker.json",
+    "metrics:telemetry": "node scripts/query-telemetry.mjs",
+    "eval:future-self": "node scripts/evaluate-future-self.mjs",
+    "cf:types": "wrangler types worker-configuration.d.ts --include-runtime false",
+    "db:migrate:local": "wrangler d1 migrations apply wenzhi-contributions --local",
+    "db:migrate:remote": "wrangler d1 migrations apply wenzhi-contributions --remote",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@phosphor-icons/react": "2.1.10",
+    "@types/three": "^0.185.4",
+    "@vitejs/plugin-react": "5.0.4",
+    "gsap": "^3.15.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "three": "^0.185.1",
+    "vite": "6.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260901.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3",
+    "wrangler": "^4.127.1"
+  }
+}
