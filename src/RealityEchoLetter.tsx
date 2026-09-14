@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { compareEcho, echoQuery, type EchoContext } from './echo-context'
 import './RealityEchoLetter.css'
 
-type Letter = { id: string; title: string; excerpt: string; sourceUrl: string; author: string; relevanceScore?: number }
+type Letter = { id: string; title: string; excerpt: string; sourceUrl: string; author: string; avatarUrl?: string; votes?: number; relevanceScore?: number }
 
 export function RealityEchoLetter({ context, onClose, onAdjust, savedLetters }: { context: EchoContext; onClose: () => void; onAdjust?: () => void; savedLetters?: Letter[] }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -42,26 +42,29 @@ export function RealityEchoLetter({ context, onClose, onAdjust, savedLetters }: 
   const letter = letters[index]
   const comparison = letter ? compareEcho(context, letter) : null
   return createPortal(<dialog className="wz-choice-letter" ref={dialog} aria-labelledby="wz-choice-letter-title" onCancel={onClose}>
-    <header><span>现实回声 · 宇宙 {context.code} · 第 {context.day} 天</span><button type="button" aria-label="关闭来信" onClick={onClose}>×</button></header>
-    <div className="wz-choice-letter-body">
-      <h2 id="wz-choice-letter-title">从别人的经历，看看自己的选择。</h2>
-      {savedLetters && <p>知乎 API 摘录 · 2026-09-14 检索保存 · 故事为虚构试玩</p>}
-      <section className="wz-choice-letter-context"><small>你的模拟路线 · {context.route}</small>{context.action && <p>上一次选择{context.actionDay !== undefined ? ` · 第 ${context.actionDay} 天` : ''}：{context.action}</p>}<p>眼前这一幕：{context.eventTitle}</p><span>{context.obstacle}</span></section>
-      <div aria-live="polite">
-        {loading && <p className="wz-choice-letter-status">正在寻找与这次选择相关的公开经历…</p>}
-        {error && <p className="wz-choice-letter-status">{error} <button type="button" onClick={() => setAttempt(value => value + 1)}>重新检索</button></p>}
-        {!loading && !error && !letter && <p className="wz-choice-letter-status">暂未找到足够相关的公开经历。这次先留白，你的选择和进度已保留。</p>}
-        {letter && comparison && <article className="wz-choice-letter-source" key={letter.id || letter.sourceUrl}><small>知乎公开内容 · {letter.author || '作者未提供'} · 不属于模拟剧情</small><h3>{letter.title}</h3>
-          <section className="wz-echo-relevance"><strong>为什么会出现在这里？</strong><p>{comparison.summary}</p></section>
-          {comparison.matches.length > 0 && <ul className="wz-echo-comparison">{comparison.matches.map(match => <li key={match.label}><b>{match.label}</b><q>{match.quote.length > 160 ? `${match.quote.slice(0, 160)}…` : match.quote}</q></li>)}</ul>}
-          <p>{letter.excerpt ? `${letter.excerpt.slice(0, 240)}${letter.excerpt.length > 240 ? '…' : ''}` : '此来源未提供摘录，请查看原文。'}</p>
-          {letter.excerpt.length > 240 && <details><summary>展开检索摘录</summary><p>{letter.excerpt}</p></details>}
-          <a href={letter.sourceUrl} target="_blank" rel="noopener noreferrer">核对作者和原文 ↗</a>
-          <aside><strong>带着这一个问题回到选择</strong><p>{context.action ? `如果在现实中尝试“${context.action}”，你的基础、可用时间和反馈条件，与原文有哪些不同？` : '对方的基础、可用时间和反馈条件，与你有哪些不同？'}</p><p>摘录可能是建议、讨论或个人经历，不能仅凭检索认定为亲身经验；没有说明的条件保持未知，他人的结果也不是你的未来。</p></aside>
-          {letters.length > 1 && <button type="button" onClick={() => setIndex(value => (value + 1) % letters.length)}>另一份经历 · {index + 1}/{letters.length} →</button>}
-        </article>}
+    <header className="wz-letter-top"><span>现实来信 / 宇宙 {context.code} · 第 {context.day} 天</span><button type="button" aria-label="关闭来信" onClick={onClose}>×</button></header>
+    <div className="wz-letter-desk">
+      <aside className="wz-letter-envelope"><img src="/art/return-envelope.png" alt="拆开的纸质信封"/><span>寄给正在选择的你</span><small>{context.route}</small></aside>
+      <div className="wz-choice-letter-body">
+        <h2 id="wz-choice-letter-title">有人也走过这段路。</h2>
+        <p className="wz-letter-salutation">关于「{context.eventTitle}」</p>
+        <div aria-live="polite">
+          {loading && <p className="wz-choice-letter-status">正在寻找相关经历…</p>}
+          {error && <p className="wz-choice-letter-status">{error} <button type="button" onClick={() => setAttempt(value => value + 1)}>重试</button></p>}
+          {!loading && !error && !letter && <p className="wz-choice-letter-status">暂时没有找到相关来信，先继续你的故事吧。</p>}
+          {letter && <article className="wz-choice-letter-source" key={letter.id || letter.sourceUrl}>
+            <div className="wz-letter-source-brand"><img src="/zhihu-logo.svg" alt="知乎"/><span>真实讨论</span></div>
+            <div className="wz-letter-author">{letter.avatarUrl && <img src={letter.avatarUrl} alt="" referrerPolicy="no-referrer" onError={event=>{event.currentTarget.style.display='none'}}/>}<span>{letter.author || '作者未提供'}</span>{comparison?.matches[0] && <small>{comparison.matches[0].label}</small>}</div>
+            <h3><a href={letter.sourceUrl} target="_blank" rel="noopener noreferrer">{letter.title.replace(/\s*[-–—]\s*知乎$/, '')} ↗</a></h3>
+            <p>{letter.excerpt ? `${letter.excerpt.slice(0, 180)}${letter.excerpt.length > 180 ? '…' : ''}` : '此来源未提供摘录，请查看原文。'}</p>
+            {letter.excerpt.length > 180 && <details><summary>展开摘录</summary><p>{letter.excerpt.slice(180)}</p></details>}
+            <div className="wz-letter-source-footer"><span>{typeof letter.votes === 'number' ? `${letter.votes.toLocaleString()} 赞同` : '知乎公开摘录'}</span><a href={letter.sourceUrl} target="_blank" rel="noopener noreferrer">查看原文 ↗</a></div>
+          </article>}
+        </div>
+        {letter && <p className="wz-letter-question">读完想一想：对方的条件，和你有哪些不同？</p>}
+        <div className="wz-letter-paper-end"><small>他人的经历，供你参考。</small>{letters.length > 1 && <button type="button" onClick={() => setIndex(value => (value + 1) % letters.length)}>下一封 · {index + 1}/{letters.length}</button>}</div>
       </div>
     </div>
-    <footer><small>阅读不会改变能力数值或已做的选择。</small><div>{onAdjust && <button type="button" onClick={onAdjust}>调整下一步</button>}<button type="button" className="wz-choice-letter-primary" onClick={onClose}>继续当前路线 →</button></div></footer>
+    <footer><div>{onAdjust && <button type="button" onClick={onAdjust}>调整下一步</button>}<button type="button" className="wz-choice-letter-primary" onClick={onClose}>回到故事</button></div></footer>
   </dialog>, document.body)
 }

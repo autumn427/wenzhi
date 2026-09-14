@@ -2784,7 +2784,7 @@ function Home({
 
 
               </div>
-              {!forkEligible && <section className="echo-entry"><div><strong>看看别人遇到这件事时怎么做</strong><p>现实回声 · 读一份与当前选择相关的公开经历</p></div><button type="button" onClick={() => setEchoContext(currentEchoContext)}>拆开来信 →</button></section>}
+              {!forkEligible && <section className="echo-entry"><div><strong>一封现实来信</strong><p>看看别人的经历</p></div><button type="button" onClick={() => setEchoContext(currentEchoContext)}>拆信 →</button></section>}
             </article>
 
 
