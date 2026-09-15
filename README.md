@@ -25,3 +25,5 @@ npm run build
 `test-submission-flow` 覆盖六条预设选择路径、单路线行动票与草稿隔离；`test-action-flow` 和 `test-relay-ai` 使用模拟接口，不代表真实模型成功率。
 
 本目录为继续开发的源码。`dist/` 是构建产物；部署、竞赛平台提交和公开仓库发布分别执行并验收。
+
+项目说明书：https://ycn7l9ezrs7u.feishu.cn/wiki/SWUhwoHGEiZ6EokJzd4cZxXknIe
